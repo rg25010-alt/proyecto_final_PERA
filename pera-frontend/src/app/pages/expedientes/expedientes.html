@@ -1,0 +1,73 @@
+<main class="pera-container pera-page">
+  <header class="pera-page-header">
+    <h1 class="pera-page-title">Expedientes estudiantiles</h1>
+  </header>
+  <div class="pera-grid pera-grid--2">
+    <section class="pera-card" aria-labelledby="titulo-alta">
+      <h2 class="pera-section-title" id="titulo-alta">Registrar estudiante</h2>
+      <form #alta class="pera-form" (submit)="registrar($event, alta)">
+        <label class="pera-field">
+          <span class="pera-label">Carné</span>
+          <input class="pera-input" name="carnet" required maxlength="20" pattern="[A-Za-z0-9]+" placeholder="Ej. PR26001">
+        </label>
+        <label class="pera-field">
+          <span class="pera-label">Nombre completo</span>
+          <input class="pera-input" name="nombre" required maxlength="150" pattern=".*\S.*">
+        </label>
+        <div class="pera-form-grid">
+          <label class="pera-field">
+            <span class="pera-label">Carrera</span>
+            <select class="pera-select" name="carreraId" required>
+              <option value="">Seleccioná una carrera</option>
+              @for (carrera of carreras(); track carrera.id) {
+                <option [value]="carrera.id">{{ carrera.nombre }}</option>
+              }
+            </select>
+          </label>
+          <label class="pera-field">
+            <span class="pera-label">CUM actual</span>
+            <input class="pera-input" type="number" name="cum" inputmode="decimal" min="0" max="10" step="0.01" required>
+          </label>
+        </div>
+        @if (avisoCatalogo()) {
+          <div role="alert" class="pera-alert pera-alert--warning">
+            {{ avisoCatalogo() }}
+            <button type="button" class="pera-btn pera-btn--outline pera-btn--sm" (click)="cargarCarreras()">Reintentar</button>
+          </div>
+        }
+        @if (errorAlta()) { <p role="alert" class="pera-alert pera-alert--danger">{{ errorAlta() }}</p> }
+        @if (confirmacion()) { <p role="status" class="pera-alert pera-alert--success">{{ confirmacion() }}</p> }
+        <div class="pera-form-actions">
+          <button class="pera-btn" type="submit" [disabled]="guardando() || !carreras().length">
+            {{ guardando() ? 'Registrando…' : 'Registrar expediente' }}
+          </button>
+        </div>
+      </form>
+    </section>
+    <section class="pera-card" aria-labelledby="titulo-consulta">
+      <h2 class="pera-section-title" id="titulo-consulta">Consultar expediente</h2>
+      <form class="pera-filter-bar" (submit)="buscar($event, consulta.value)">
+        <label class="pera-field">
+          <span class="pera-label">Carné del estudiante</span>
+          <input #consulta class="pera-input" type="search" required maxlength="20" pattern="[A-Za-z0-9]+" placeholder="Ej. PR26001">
+        </label>
+        <button class="pera-btn pera-btn--secondary" type="submit" [disabled]="buscando()">
+          {{ buscando() ? 'Buscando…' : 'Buscar' }}
+        </button>
+      </form>
+      @if (errorBusqueda()) { <p role="alert" class="pera-alert pera-alert--warning">{{ errorBusqueda() }}</p> }
+      @if (resultado(); as alumno) {
+        <article aria-live="polite" class="pera-card__footer">
+          <h3>{{ alumno.nombre }}</h3>
+          <dl class="pera-stack">
+            <div><dt class="pera-label">Carné</dt><dd>{{ alumno.carnet }}</dd></div>
+            <div><dt class="pera-label">Carrera</dt><dd>{{ nombreCarrera(alumno.carreraId) }}</dd></div>
+            <div><dt class="pera-label">CUM actual</dt><dd>{{ alumno.cum.toFixed(2) }}</dd></div>
+            <div><dt class="pera-label">Estado PERA</dt><dd>{{ alumno.estadoPera }}</dd></div>
+            <div><dt class="pera-label">Tope de UV</dt><dd>{{ alumno.topeUv ?? 'Pendiente de cálculo' }}</dd></div>
+          </dl>
+        </article>
+      }
+    </section>
+  </div>
+</main>
