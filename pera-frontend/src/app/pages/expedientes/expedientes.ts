@@ -2,9 +2,11 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Carrera, Expediente } from '../../models/expediente';
 import { ServicioExpedientes } from '../../services/expedientes';
+import { TutoresExpediente } from '../../components/tutores-expediente/tutores-expediente';
 
 @Component({
   selector: 'app-expedientes',
+  imports: [TutoresExpediente],
   templateUrl: './expedientes.html',
 })
 export class PaginaExpedientes implements OnInit {
