@@ -67,6 +67,7 @@
             <div><dt class="pera-label">Tope de UV</dt><dd>{{ alumno.topeUv ?? 'Pendiente de cálculo' }}</dd></div>
           </dl>
         </article>
+        <app-tutores-expediente [carnet]="alumno.carnet" />
       }
     </section>
   </div>

@@ -1,0 +1,60 @@
+<section class="pera-card__footer pera-stack" aria-labelledby="titulo-tutores">
+  <h3 id="titulo-tutores" class="pera-card__title">Tutores asignados</h3>
+  @if (error()) { <p role="alert" class="pera-alert pera-alert--danger">{{ error() }}</p> }
+  @switch (estado()) {
+    @case ('acceso') {
+      @if (desarrollo) {
+        <form class="pera-form" (submit)="acceder($event, clave)">
+          <label class="pera-field">
+            <span class="pera-label">Credencial local de Coordinación</span>
+            <input #clave class="pera-input" type="password" required autocomplete="off" spellcheck="false"
+              aria-describedby="ayuda-credencial">
+            <span id="ayuda-credencial" class="pera-field-help">Pegá el token que muestra el backend al iniciar con --token-coordinacion.</span>
+          </label>
+          <div><button class="pera-btn pera-btn--secondary" type="submit">Acceder a tutorías</button></div>
+        </form>
+      } @else {
+        <p class="pera-muted">Se requiere una sesión de Coordinación PERA.</p>
+      }
+    }
+    @case ('cargando') { <p role="status">Cargando tutores…</p> }
+    @case ('error') {
+      <div><button type="button" class="pera-btn pera-btn--outline" (click)="cargar()">Reintentar</button></div>
+    }
+    @case ('listo') {
+      @if (asignaciones().length) {
+        <ul class="pera-list" aria-label="Docentes y áreas de refuerzo">
+          @for (asignacion of asignaciones(); track asignacion.id) {
+            <li class="pera-list__item">
+              <div><strong>{{ asignacion.tutor.nombre }}</strong><br>{{ asignacion.areaRefuerzo }}</div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="pera-muted">Este estudiante aún no tiene tutores asignados.</p>
+      }
+      @if (tutores().length) {
+        <form #alta class="pera-form" (submit)="asignar($event, alta)">
+          <label class="pera-field">
+            <span class="pera-label">Docente tutor</span>
+            <select class="pera-select" name="tutorId" required>
+              <option value="">Seleccioná un tutor</option>
+              @for (tutor of tutores(); track tutor.id) {
+                <option [value]="tutor.id">{{ tutor.nombre }} · {{ tutor.departamento }}</option>
+              }
+            </select>
+          </label>
+          <label class="pera-field">
+            <span class="pera-label">Área de refuerzo</span>
+            <input class="pera-input" name="areaRefuerzo" required placeholder="Ej. Bases de Datos">
+          </label>
+          <div><button type="submit" class="pera-btn" [disabled]="guardando()">
+            {{ guardando() ? 'Asignando…' : 'Asignar tutor' }}
+          </button></div>
+        </form>
+      } @else { <p class="pera-muted">El catálogo no contiene tutores activos.</p> }
+      @if (aviso()) { <p role="status" class="pera-alert pera-alert--success">{{ aviso() }}</p> }
+      <div><button class="pera-btn pera-btn--ghost pera-btn--sm" type="button" (click)="cerrar()">Cerrar acceso de Coordinación</button></div>
+    }
+  }
+</section>
