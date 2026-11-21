@@ -1,0 +1,75 @@
+@if (permitido) {
+  <main class="pera-container pera-page">
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">PERA · Estudiantes</p>
+        <h1 class="pera-page-title">Detalle del expediente</h1>
+      </div>
+      <a class="pera-btn pera-btn--outline" routerLink="/estudiantes">Volver al listado</a>
+    </header>
+    @if (vista | async; as v) {
+      @switch (v.estado) {
+        @case ('cargando') { <p role="status" class="pera-muted">Cargando expediente…</p> }
+        @case ('ausente') { <p role="status" class="pera-alert pera-alert--warning">Expediente no disponible para consulta.</p> }
+        @case ('error') { <p role="alert" class="pera-alert pera-alert--danger">No se pudo cargar el expediente. Volvé al listado e intentá de nuevo.</p> }
+        @case ('listo') {
+          @let alumno = v.expediente;
+          <div class="pera-stack">
+            <section class="pera-card" aria-labelledby="nombre-alumno">
+              <div class="pera-card__header">
+                <div><p class="pera-eyebrow">Carné {{ alumno.carnet }}</p>
+                  <h2 class="pera-section-title" id="nombre-alumno">{{ alumno.nombre }}</h2></div>
+                <span class="pera-badge pera-badge--info">Estado PERA · {{ alumno.estadoPera }}</span>
+              </div>
+              <dl class="datos">
+                <div><dt>Carrera</dt><dd>{{ alumno.carrera }}</dd></div>
+                <div><dt>Departamento</dt><dd>{{ alumno.departamento }}</dd></div>
+                <div><dt>CUM actual</dt><dd>{{ alumno.cum.toFixed(2) }}</dd></div>
+                <div><dt>Límite de UV</dt><dd>{{ alumno.topeUv == null ? 'Pendiente de cálculo' : alumno.topeUv + ' UV' }}</dd></div>
+              </dl>
+            </section>
+
+            <section class="pera-card" aria-labelledby="titulo-tutores">
+              <h2 class="pera-section-title" id="titulo-tutores">Tutores asignados</h2>
+              @if (alumno.tutoresAsignados.length) {
+                <ul class="pera-list">
+                  @for (asignacion of alumno.tutoresAsignados; track asignacion) {
+                    <li class="pera-list__item"><strong>{{ asignacion.tutor.nombre }}</strong> · {{ asignacion.areaRefuerzo }}</li>
+                  }
+                </ul>
+              } @else { <p class="pera-muted">Todavía no hay tutores asignados.</p> }
+            </section>
+
+            <section class="pera-card" aria-labelledby="titulo-historial">
+              <h2 class="pera-section-title" id="titulo-historial">Historial de tutorías</h2>
+              @if (alumno.historial.length) {
+                <ol class="sesiones">
+                  @for (sesion of alumno.historial; track sesion.id) {
+                    <li><strong>{{ sesion.tema }}</strong>
+                      <p class="pera-card__subtitle"><time [attr.datetime]="sesion.fecha">{{ sesion.fecha | date:'dd/MM/yyyy':'UTC' }}</time> · {{ sesion.tutor }} · {{ sesion.asistencia }}</p>
+                      @if (sesion.acuerdos) { <p><strong>Acuerdos</strong> · {{ sesion.acuerdos }}</p> }
+                    </li>
+                  }
+                </ol>
+              } @else { <p class="pera-muted">Todavía no hay sesiones registradas.</p> }
+            </section>
+
+            <section class="pera-card" aria-labelledby="titulo-notas">
+              <h2 class="pera-section-title" id="titulo-notas">Notas parciales</h2>
+              @if (alumno.notas.length) {
+                <div class="pera-table-wrap">
+                  <table class="pera-table"><caption class="pera-sr-only">Calificaciones de {{ alumno.nombre }}</caption>
+                    <thead><tr><th scope="col">Fecha</th><th scope="col">Actividad</th><th scope="col">Nota</th></tr></thead>
+                    <tbody>@for (n of alumno.notas; track n.id) {
+                      <tr><td>{{ n.fecha | date:'dd/MM/yyyy':'UTC' }}</td><td>{{ n.actividad }}</td><td>{{ n.nota.toFixed(2) }}</td></tr>
+                    }</tbody>
+                  </table>
+                </div>
+              } @else { <p class="pera-muted">Todavía no hay notas registradas.</p> }
+            </section>
+          </div>
+        }
+      }
+    }
+  </main>
+}
