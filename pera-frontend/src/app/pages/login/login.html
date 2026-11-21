@@ -1,0 +1,25 @@
+<main class="pera-container pera-page acceso">
+  <section class="pera-card" aria-labelledby="titulo-login">
+    <header>
+      <p class="pera-eyebrow">Universidad de El Salvador · PERA</p>
+      <h1 id="titulo-login" class="pera-page-title">Inicio de sesión</h1>
+      <p class="pera-page-subtitle">Programa Especial de Refuerzo Académico</p>
+    </header>
+    <form class="pera-form" (submit)="ingresar($event, correo, clave)">
+      <label class="pera-field">
+        <span class="pera-label">Correo electrónico</span>
+        <input #correo class="pera-input" name="correo" type="email" autocomplete="username" required>
+      </label>
+      <label class="pera-field">
+        <span class="pera-label">Contraseña</span>
+        <input #clave class="pera-input" name="clave" type="password" autocomplete="current-password" required>
+      </label>
+      @if (error()) {
+        <p role="alert" class="pera-alert pera-alert--danger">{{ error() }}</p>
+      }
+      <button class="pera-btn" type="submit" [disabled]="enviando()">
+        {{ enviando() ? 'Ingresando…' : 'Ingresar' }}
+      </button>
+    </form>
+  </section>
+</main>
