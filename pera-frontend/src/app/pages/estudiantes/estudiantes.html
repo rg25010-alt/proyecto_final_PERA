@@ -1,0 +1,79 @@
+<main class="pera-container pera-page">
+  <header class="pera-page-header">
+    <div>
+      <p class="pera-eyebrow">PERA · Expedientes</p>
+      <h1 class="pera-page-title">Listado de estudiantes</h1>
+    </div>
+    <a class="pera-btn pera-btn--outline" routerLink="/inicio">Volver al inicio</a>
+  </header>
+
+  @if (permitido()) {
+    <section class="pera-card" aria-label="Búsqueda de estudiantes">
+      <div class="pera-filter-bar" role="search" aria-label="Filtrar estudiantes">
+        <label class="pera-field"><span class="pera-label">Buscar por carné</span>
+          <input #busqueda type="search" class="pera-input" placeholder="Ej. DE00001"
+            [value]="carnet()" (input)="carnet.set(busqueda.value)">
+        </label>
+        <label class="pera-field"><span class="pera-label">Carrera</span>
+          <select #opcionCarrera class="pera-select" [value]="carrera()" (change)="carrera.set(opcionCarrera.value)">
+            <option value="">Todas las carreras</option>
+            @for (c of carreras(); track c) { <option [value]="c">{{ c }}</option> }
+          </select>
+        </label>
+        <label class="pera-field"><span class="pera-label">Estado PERA</span>
+          <select #opcionEstado class="pera-select" [value]="estado()" (change)="estado.set(opcionEstado.value)">
+            <option value="">Todos los estados</option>
+            @for (e of estados(); track e) { <option [value]="e">{{ e }}</option> }
+          </select>
+        </label>
+        <button class="pera-btn pera-btn--secondary" type="button" (click)="limpiar()">Limpiar filtros</button>
+      </div>
+      <p role="status" class="pera-muted">{{ resultados().length }} {{ resultados().length === 1 ? 'estudiante' : 'estudiantes' }}</p>
+
+      @if (resultados().length) {
+        <div class="pera-table-wrap" tabindex="0" role="region" aria-label="Resultados">
+          <table class="pera-table">
+            <caption class="pera-sr-only">Expedientes disponibles para consulta</caption>
+            <thead><tr><th scope="col">Carné</th><th scope="col">Estudiante</th><th scope="col">Carrera</th>
+              <th scope="col">CUM</th><th scope="col">Estado PERA</th><th scope="col">Expediente</th></tr></thead>
+            <tbody>
+              @for (alumno of resultados(); track alumno.carnet) {
+                <tr>
+                  <td>{{ alumno.carnet }}</td><td>{{ alumno.nombre }}</td><td>{{ alumno.carrera }}</td>
+                  <td>{{ alumno.cum.toFixed(2) }}</td><td><span class="pera-badge pera-badge--info">{{ alumno.estadoPera }}</span></td>
+                  <td>
+                    @if (tieneRutaDetalle) {
+                      <a class="pera-btn pera-btn--outline pera-btn--sm" [routerLink]="['/expediente-detalle', alumno.carnet]">Ver detalle<span class="pera-sr-only"> de {{ alumno.nombre }}</span></a>
+                    } @else {
+                      <button class="pera-btn pera-btn--outline pera-btn--sm" type="button" (click)="verFicha(alumno, ficha)">Ver detalle<span class="pera-sr-only"> de {{ alumno.nombre }}</span></button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="pera-empty">
+          <p class="pera-empty__title">{{ catalogo.estudiantes().length ? 'Ningún estudiante coincide con los filtros' : 'Sin expedientes disponibles' }}</p>
+          @if (catalogo.estudiantes().length) { <p class="pera-empty__text">Probá con otro carné o limpiá los filtros.</p> }
+        </div>
+      }
+    </section>
+    <dialog #ficha class="ficha pera-card" aria-labelledby="titulo-ficha" (close)="detalle.set(null)">
+      @if (detalle(); as alumno) {
+        <p class="pera-eyebrow">Ficha del estudiante · {{ alumno.carnet }}</p>
+        <h2 class="pera-section-title" id="titulo-ficha">{{ alumno.nombre }}</h2>
+        <dl>
+          <dt>Carrera</dt><dd>{{ alumno.carrera }}</dd>
+          <dt>Departamento</dt><dd>{{ alumno.departamento }}</dd>
+          <dt>CUM</dt><dd>{{ alumno.cum.toFixed(2) }}</dd>
+          <dt>Estado PERA</dt><dd>{{ alumno.estadoPera }}</dd>
+        </dl>
+      }
+      <form method="dialog"><button class="pera-btn" autofocus>Cerrar</button></form>
+    </dialog>
+  } @else {
+    <p class="pera-alert pera-alert--warning" role="alert">Tu perfil no tiene acceso al listado.</p>
+  }
+</main>
