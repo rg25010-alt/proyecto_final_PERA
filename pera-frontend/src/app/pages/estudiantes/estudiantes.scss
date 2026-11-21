@@ -1,0 +1,11 @@
+.pera-table { min-width: 43rem; }
+
+.ficha {
+  width: min(92vw, 30rem);
+  margin: auto;
+}
+
+.ficha::backdrop { background: rgb(17 35 58 / 48%); }
+.ficha dl { display: grid; grid-template-columns: auto 1fr; gap: .65rem 1rem; }
+.ficha dt { font-weight: 700; }
+.ficha dd { margin: 0; }
