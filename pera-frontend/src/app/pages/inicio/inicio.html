@@ -1,0 +1,28 @@
+@if (acceso.perfil(); as perfil) {
+  <main class="pera-container pera-page">
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">PERA · {{ vistas[perfil.rol].titulo }}</p>
+        <h1 class="pera-page-title">Te damos la bienvenida, {{ perfil.nombre }}</h1>
+        <p class="pera-page-subtitle">{{ vistas[perfil.rol].resumen }}</p>
+      </div>
+      <button class="pera-btn pera-btn--outline" type="button" (click)="salir()" [disabled]="saliendo()">Cerrar sesión</button>
+    </header>
+    @if (error()) { <p role="alert" class="pera-alert pera-alert--danger">{{ error() }}</p> }
+    <section aria-labelledby="titulo-modulos">
+      <h2 id="titulo-modulos" class="pera-section-title">Mis módulos</h2>
+      <ul class="modulos">
+        @for (modulo of vistas[perfil.rol].modulos; track modulo.ruta) {
+          <li class="pera-card">
+            @if (disponible(modulo.ruta)) {
+              <a class="pera-card__title" [routerLink]="['/', modulo.ruta]">{{ modulo.titulo }}</a>
+            } @else {
+              <span class="pera-card__title">{{ modulo.titulo }}</span>
+              <p class="pera-card__subtitle">Pendiente de integración</p>
+            }
+          </li>
+        }
+      </ul>
+    </section>
+  </main>
+}
