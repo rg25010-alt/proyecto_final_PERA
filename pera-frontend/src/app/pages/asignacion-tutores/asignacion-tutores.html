@@ -1,0 +1,35 @@
+@if (permitido()) {
+  <main class="pera-container pera-page asignacion">
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">PERA · Coordinación</p>
+        <h1 class="pera-page-title">Asignar tutores</h1>
+      </div>
+      <a class="pera-btn pera-btn--outline" routerLink="/inicio">Volver al inicio</a>
+    </header>
+    <section class="pera-card" aria-labelledby="titulo-estudiante">
+      <h2 id="titulo-estudiante" class="pera-section-title">Expediente del estudiante</h2>
+      @if (listado.estudiantes().length) {
+        <label class="pera-field">
+          <span class="pera-label">Estudiante</span>
+          <select #estudiante class="pera-select" name="carnet" [value]="carnet()" (change)="carnet.set(estudiante.value)">
+            <option value="">Seleccioná un estudiante</option>
+            @for (alumno of listado.estudiantes(); track alumno.carnet) {
+              <option [value]="alumno.carnet">{{ alumno.carnet }} · {{ alumno.nombre }}</option>
+            }
+          </select>
+        </label>
+      } @else {
+        <p class="pera-muted" role="status">Todavía no hay expedientes disponibles para asignar tutores.</p>
+      }
+      @for (alumno of seleccion(); track alumno.carnet) {
+        <div class="expediente">
+          <p>{{ alumno.carrera }} · {{ alumno.estadoPera }}</p>
+          <a class="pera-btn pera-btn--outline pera-btn--sm" [routerLink]="['/expediente-detalle', alumno.carnet]">Ver expediente</a>
+        </div>
+        <app-tutores-expediente [carnet]="alumno.carnet" />
+      }
+    </section>
+  </main>
+}
+

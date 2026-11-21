@@ -1,0 +1,12 @@
+.asignacion { max-width: 54rem; }
+
+.expediente {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem 1rem;
+  margin-block-start: .75rem;
+}
+
+.expediente p { margin: 0; color: var(--pera-text-muted); }
