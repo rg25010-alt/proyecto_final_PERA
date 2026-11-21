@@ -1,0 +1,11 @@
+.registro { max-width: 54rem; }
+
+.registro dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: .5rem 1rem;
+  margin-block: 1rem 1.5rem;
+}
+
+.registro dt { font-weight: 700; }
+.registro dd { margin: 0; }
