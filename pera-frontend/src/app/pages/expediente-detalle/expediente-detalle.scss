@@ -1,0 +1,12 @@
+.datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 1rem;
+  margin: 0;
+}
+
+.datos dt { color: var(--pera-text-muted); }
+.datos dd { margin: .25rem 0 0; font-weight: 600; }
+
+.sesiones { margin: 0; padding-inline-start: 1.5rem; }
+.sesiones li + li { margin-block-start: 1rem; }
