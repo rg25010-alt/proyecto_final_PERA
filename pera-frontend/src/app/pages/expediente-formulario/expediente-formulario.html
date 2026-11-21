@@ -1,0 +1,64 @@
+@if (permitido()) {
+  <main class="pera-container pera-page registro">
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">PERA · Administración Académica</p>
+        <h1 class="pera-page-title">Registrar expediente</h1>
+      </div>
+      <a class="pera-btn pera-btn--outline" routerLink="/inicio">Volver al inicio</a>
+    </header>
+    @if (registrado(); as alumno) {
+      <section class="pera-card" aria-labelledby="titulo-confirmacion">
+        <h2 id="titulo-confirmacion" class="pera-section-title">Expediente registrado</h2>
+        <p role="status">Se registró a <strong>{{ alumno.nombre }}</strong> con el carné <strong>{{ alumno.carnet }}</strong>.</p>
+        <dl>
+          <dt>CUM</dt><dd>{{ alumno.cum.toFixed(2) }}</dd>
+          <dt>Estado PERA</dt><dd>{{ alumno.estadoPera }}</dd>
+          <dt>Límite de UV</dt><dd>{{ alumno.topeUv == null ? 'Pendiente de cálculo' : alumno.topeUv + ' UV' }}</dd>
+        </dl>
+        <div class="pera-inline">
+          <a routerLink="/estudiantes" class="pera-btn">Ir al listado de estudiantes</a>
+          <button type="button" class="pera-btn pera-btn--outline" (click)="registrado.set(null)">Registrar otro expediente</button>
+        </div>
+      </section>
+    } @else {
+      <section class="pera-card" aria-labelledby="titulo-datos">
+        <h2 id="titulo-datos" class="pera-section-title">Datos del estudiante</h2>
+        <form #alta class="pera-form" (submit)="registrar($event, alta)">
+          <div class="pera-form-grid">
+            <label class="pera-field"><span class="pera-label">Carné</span>
+              <input class="pera-input" name="carnet" type="text" required pattern="[A-Za-z0-9]{1,20}" maxlength="20" placeholder="Ej. AR26010">
+            </label>
+            <label class="pera-field"><span class="pera-label">Nombre completo</span>
+              <input class="pera-input" name="nombre" type="text" required maxlength="150" pattern=".*\S.*">
+            </label>
+          </div>
+          <label class="pera-field"><span class="pera-label">Carrera</span>
+            <select class="pera-select" name="carreraId" required>
+              <option value="">Seleccioná una carrera</option>
+              @for (carrera of carreras(); track carrera.id) { <option [value]="carrera.id">{{ carrera.nombre }}</option> }
+            </select>
+          </label>
+          @if (avisoCatalogo()) {
+            <div role="alert" class="pera-alert pera-alert--warning">{{ avisoCatalogo() }}
+              <button type="button" class="pera-btn pera-btn--outline pera-btn--sm" (click)="cargarCarreras()">Reintentar</button>
+            </div>
+          }
+          <div class="pera-form-grid">
+            <label class="pera-field"><span class="pera-label">CUM actual</span>
+              <input class="pera-input" type="number" name="cum" min="0" max="10" step="0.01" inputmode="decimal" required placeholder="Ej. 6.35" aria-describedby="ayuda-cum">
+              <span class="pera-field-help" id="ayuda-cum">Entre 0 y 10, con hasta dos decimales.</span>
+            </label>
+            <div class="pera-field"><span class="pera-label">Límite de UV</span>
+              <span class="pera-field-help">El sistema determina el límite según el CUM y las reglas académicas vigentes.</span>
+            </div>
+          </div>
+          @if (error()) { <p role="alert" class="pera-alert pera-alert--danger">{{ error() }}</p> }
+          <div class="pera-form-actions">
+            <button class="pera-btn" type="submit" [disabled]="guardando() || !carreras().length">{{ guardando() ? 'Registrando…' : 'Registrar expediente' }}</button>
+          </div>
+        </form>
+      </section>
+    }
+  </main>
+}
