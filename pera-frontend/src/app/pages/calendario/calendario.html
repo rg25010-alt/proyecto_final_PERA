@@ -1,0 +1,92 @@
+<main class="pera-container pera-page">
+  <div>
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">Gestión de tutorías · PERA</p>
+        <h1 class="pera-page-title">Calendario de tutorías</h1>
+        <p class="pera-page-subtitle">Consulta las fechas, horarios y modalidades de las sesiones académicas.</p>
+      </div>
+      <button type="button" class="pera-btn pera-btn--outline" (click)="irHoy()">Ir al mes actual</button>
+    </header>
+
+    <section class="pera-card pera-filter-bar filtros" aria-label="Filtros de tutorías">
+      <div class="pera-field">
+        <label for="filtro-modalidad">Modalidad</label>
+        <select id="filtro-modalidad" class="pera-select" [value]="modalidad()" (change)="modalidad.set($any($event.target).value)">
+          <option value="Todas">Todas</option>
+          <option value="Virtual">Virtual</option>
+          <option value="Presencial">Presencial</option>
+        </select>
+      </div>
+      <div class="pera-field">
+        <label for="filtro-estado">Estado</label>
+        <select id="filtro-estado" class="pera-select" [value]="estado()" (change)="estado.set($any($event.target).value)">
+          <option value="Todos">Todos</option>
+          <option value="Programada">Programada</option>
+          <option value="Finalizada">Finalizada</option>
+          <option value="Cancelada">Cancelada</option>
+        </select>
+      </div>
+      <div class="leyenda"><span class="punto presencial"></span> Presencial <span class="punto virtual"></span> Virtual</div>
+    </section>
+
+    <div class="contenido">
+      <section class="pera-card calendario" aria-label="Calendario mensual">
+        <div class="calendario-cabecera">
+          <h2 class="pera-section-title">{{ nombreMes() }}</h2>
+          <div class="controles">
+            <button type="button" class="pera-btn pera-btn--outline pera-btn--sm" aria-label="Mes anterior" (click)="cambiarMes(-1)">‹</button>
+            <button type="button" class="pera-btn pera-btn--outline pera-btn--sm" aria-label="Mes siguiente" (click)="cambiarMes(1)">›</button>
+          </div>
+        </div>
+        <div class="pera-calendar cuadricula">
+          @for (diaSemana of diasSemana; track diaSemana) {
+            <div class="nombre-dia">{{ diaSemana }}</div>
+          }
+          @for (dia of celdas(); track $index) {
+            <div class="celda" [class.vacia]="dia === null" [class.actual]="dia !== null && esHoy(dia)">
+              @if (dia !== null) {
+                <span class="numero-dia">{{ dia }}</span>
+                @for (sesion of sesionesDia(dia); track sesion.id) {
+                  <button type="button" class="pera-calendar__event evento" [class.virtual]="sesion.modalidad === 'Virtual'" [class.cancelada]="sesion.estado === 'Cancelada'" (click)="seleccionada.set(sesion)" [attr.aria-label]="'Ver sesión de ' + sesion.materia + ' a las ' + sesion.hora">
+                    <strong>{{ sesion.hora }}</strong> {{ sesion.materia }}
+                  </button>
+                }
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <aside class="lateral">
+        <section class="pera-card">
+          <h2 class="pera-section-title">Próximas tutorías</h2>
+          @for (sesion of proximas(); track sesion.id) {
+            <button type="button" class="proxima" (click)="seleccionada.set(sesion)">
+              <span class="proxima-fecha">{{ sesion.fecha | date:'dd/MM' }} · {{ sesion.hora }}</span>
+              <strong>{{ sesion.materia }}</strong>
+              <span class="pera-muted pera-text-small">{{ sesion.tutor }} · {{ sesion.modalidad }}</span>
+            </button>
+          } @empty {
+            <p class="pera-muted pera-text-small">No hay próximas tutorías con estos filtros.</p>
+          }
+        </section>
+        <section class="pera-card detalle" aria-live="polite">
+          <h2 class="pera-section-title">Detalle de la sesión</h2>
+          @if (seleccionada(); as sesion) {
+            <h3>{{ sesion.materia }}</h3>
+            <p><strong>Docente:</strong> {{ sesion.tutor }}</p>
+            <p><strong>Fecha:</strong> {{ sesion.fecha | date:'dd/MM/yyyy' }}</p>
+            <p><strong>Hora:</strong> {{ sesion.hora }}</p>
+            <p><strong>Modalidad:</strong> {{ sesion.modalidad }}</p>
+            <p><strong>Lugar / enlace:</strong> {{ sesion.lugar }}</p>
+            <span class="pera-badge" [class.pera-badge--success]="sesion.estado === 'Finalizada'" [class.pera-badge--warning]="sesion.estado === 'Programada'" [class.pera-badge--danger]="sesion.estado === 'Cancelada'">{{ sesion.estado }}</span>
+          } @else {
+            <p class="pera-muted pera-text-small">Selecciona una tutoría del calendario para consultar su información.</p>
+          }
+        </section>
+      </aside>
+    </div>
+    <p class="pera-muted pera-text-small aviso">Datos de demostración. La integración con el backend se realizará posteriormente.</p>
+  </div>
+</main>

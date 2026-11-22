@@ -1,0 +1,159 @@
+<main class="pera-page">
+  <div class="pera-container">
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">Gestión académica · PERA</p>
+        <h1 class="pera-page-title">Habilitación de egreso</h1>
+        <p class="pera-page-subtitle">Revisión de resultados académicos y registro del estado administrativo de egreso.</p>
+      </div>
+      <span class="pera-badge pera-badge--info">Datos de demostración</span>
+    </header>
+
+    @if (!rol()) {
+      <div class="pera-card modo-prueba">
+        <div>
+          <strong>Vista de prueba por rol</strong>
+          <p class="pera-muted">No hay una sesión iniciada. Cambia de rol para revisar las dos vistas.</p>
+        </div>
+        <div class="pera-actions">
+          <button type="button" class="pera-btn pera-btn--sm"
+            [class.pera-btn--outline]="rolDemo() !== 'Jefatura'"
+            (click)="rolDemo.set('Jefatura')">Jefatura</button>
+          <button type="button" class="pera-btn pera-btn--sm"
+            [class.pera-btn--outline]="rolDemo() !== 'AdministracionAcademica'"
+            (click)="rolDemo.set('AdministracionAcademica')">Administración Académica</button>
+        </div>
+      </div>
+    }
+
+    @if (!permitido()) {
+      <div class="pera-alert pera-alert--warning">Tu perfil no tiene permiso para consultar esta sección.</div>
+    } @else {
+      <section class="pera-grid pera-grid--3 resumen">
+        <div class="pera-card indicador">
+          <span class="pera-muted">Solicitudes registradas</span>
+          <strong>{{ solicitudes().length }}</strong>
+        </div>
+        <div class="pera-card indicador">
+          <span class="pera-muted">Pendientes o en revisión</span>
+          <strong>{{ totalPendientes() }}</strong>
+        </div>
+        <div class="pera-card indicador">
+          <span class="pera-muted">Habilitados</span>
+          <strong>{{ totalHabilitados() }}</strong>
+        </div>
+      </section>
+
+      <div class="pera-alert pera-alert--info">
+        @if (puedeRevisar()) {
+          <strong>Jefatura:</strong> puedes revisar los resultados y el cumplimiento académico. El registro administrativo corresponde a Administración Académica.
+        } @else {
+          <strong>Administración Académica:</strong> puedes consultar los resultados y registrar el estado administrativo de egreso.
+        }
+      </div>
+
+      <section class="pera-card seccion">
+        <div class="pera-card__header">
+          <div>
+            <h2 class="pera-card__title">Solicitudes de egreso</h2>
+            <p class="pera-card__subtitle">Selecciona un estudiante para consultar su expediente de egreso.</p>
+          </div>
+        </div>
+        <div class="pera-filter-bar filtros">
+          <div class="pera-field">
+            <label class="pera-label" for="buscar">Buscar por carnet o nombre</label>
+            <input class="pera-input" id="buscar" type="search" placeholder="Ej. LM21015"
+              [value]="buscar()" (input)="buscar.set($any($event.target).value)" />
+          </div>
+          <div class="pera-field">
+            <label class="pera-label" for="estado">Estado administrativo</label>
+            <select class="pera-select" id="estado" [value]="filtro()"
+              (change)="filtro.set($any($event.target).value)">
+              <option value="Todos">Todos</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="En revisión">En revisión</option>
+              <option value="Habilitado">Habilitado</option>
+              <option value="Observado">Observado</option>
+            </select>
+          </div>
+        </div>
+        <div class="pera-table-wrap">
+          <table class="pera-table">
+            <thead>
+              <tr><th>Carnet</th><th>Estudiante</th><th>Carrera</th><th>UV</th><th>Resultado</th><th>Estado</th><th>Acción</th></tr>
+            </thead>
+            <tbody>
+              @for (s of resultados(); track s.carnet) {
+                <tr>
+                  <td>{{ s.carnet }}</td>
+                  <td>{{ s.estudiante }}</td>
+                  <td>{{ s.carrera }}</td>
+                  <td>{{ s.uvAprobadas }}/{{ s.uvRequeridas }}</td>
+                  <td>{{ s.resultadoAcademico }}</td>
+                  <td>
+                    <span class="pera-badge"
+                      [class.pera-badge--success]="s.estado === 'Habilitado'"
+                      [class.pera-badge--warning]="s.estado === 'Pendiente' || s.estado === 'En revisión'"
+                      [class.pera-badge--danger]="s.estado === 'Observado'">{{ s.estado }}</span>
+                  </td>
+                  <td><button type="button" class="pera-btn pera-btn--outline pera-btn--sm" (click)="seleccionar(s.carnet)">Ver detalle</button></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="7" class="sin-datos">No hay solicitudes con los filtros seleccionados.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      @if (detalle(); as estudiante) {
+        <section class="pera-card seccion">
+          <div class="pera-card__header">
+            <div>
+              <h2 class="pera-card__title">Detalle de egreso</h2>
+              <p class="pera-card__subtitle">{{ estudiante.estudiante }} · {{ estudiante.carnet }}</p>
+            </div>
+            <button type="button" class="pera-btn pera-btn--outline pera-btn--sm" (click)="seleccion.set(null)">Cerrar</button>
+          </div>
+          <div class="pera-grid pera-grid--3 detalle">
+            <div><span class="pera-muted">CUM</span><strong>{{ estudiante.cum }}</strong></div>
+            <div><span class="pera-muted">UV aprobadas</span><strong>{{ estudiante.uvAprobadas }} / {{ estudiante.uvRequeridas }}</strong></div>
+            <div><span class="pera-muted">Resultado académico</span><strong>{{ estudiante.resultadoAcademico }}</strong></div>
+          </div>
+          @if (puedeRevisar()) {
+            <div class="pera-alert pera-alert--success">Consulta académica disponible. Esta vista no modifica el estado administrativo.</div>
+            <p class="pera-muted">Observación registrada: {{ estudiante.observacion || 'Sin observaciones' }}</p>
+          }
+          @if (puedeRegistrar()) {
+            <div class="pera-form-grid">
+              <div class="pera-field">
+                <label class="pera-label" for="nuevo-estado">Estado administrativo</label>
+                <select class="pera-select" id="nuevo-estado" [value]="estadoNuevo()"
+                  (change)="estadoNuevo.set($any($event.target).value)">
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="En revisión">En revisión</option>
+                  <option value="Habilitado">Habilitado</option>
+                  <option value="Observado">Observado</option>
+                </select>
+              </div>
+              <div class="pera-field">
+                <label class="pera-label" for="observacion">Observaciones</label>
+                <textarea class="pera-textarea" id="observacion" rows="3"
+                  [value]="observacion()" (input)="observacion.set($any($event.target).value)"
+                  placeholder="Anota el resultado de la revisión administrativa"></textarea>
+              </div>
+            </div>
+            @if (mensaje()) {
+              <div class="pera-alert" [class.pera-alert--danger]="mensaje().startsWith('No se puede')"
+                [class.pera-alert--success]="!mensaje().startsWith('No se puede')" role="status">{{ mensaje() }}</div>
+            }
+            <div class="pera-form-actions">
+              <button type="button" class="pera-btn" (click)="registrar()">Guardar estado administrativo</button>
+            </div>
+          }
+        </section>
+      }
+      <p class="pera-muted nota">Los registros son ficticios. Los cambios solo se conservan mientras la aplicación permanece abierta. La validación definitiva deberá realizarse en el backend.</p>
+    }
+  </div>
+</main>

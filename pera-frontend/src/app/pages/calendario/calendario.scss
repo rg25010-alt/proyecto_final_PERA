@@ -1,0 +1,28 @@
+.filtros { margin-bottom: var(--pera-space-5); }
+.leyenda { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--pera-text-muted); font-size: var(--pera-text-sm); }
+.punto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+.presencial { background: var(--pera-secondary); }
+.virtual.punto { background: var(--pera-success); }
+.contenido { display: grid; grid-template-columns: minmax(0,1fr) 290px; gap: 20px; align-items: start; }
+.calendario-cabecera { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+.calendario-cabecera h2 { margin: 0; text-transform: capitalize; }
+.controles { display: flex; gap: 8px; }
+.cuadricula { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); overflow: visible; }
+.nombre-dia { text-align: center; padding: 9px 2px; background: var(--pera-primary-soft); color: var(--pera-primary-dark); font-size: var(--pera-text-xs); font-weight: 700; border: 1px solid var(--pera-border); }
+.celda { min-width: 0; min-height: 105px; padding: 6px 4px; border: 1px solid var(--pera-border); }
+.celda.vacia { background: var(--pera-surface-alt); }
+.celda.actual { background: var(--pera-primary-soft); }
+.numero-dia { display: inline-grid; place-items: center; width: 26px; height: 26px; font-size: var(--pera-text-xs); font-weight: 700; }
+.actual .numero-dia { border-radius: 50%; background: var(--pera-primary); color: var(--pera-white); }
+.evento { width: 100%; text-align: left; border-top: 0; border-right: 0; border-bottom: 0; cursor: pointer; font: inherit; font-size: .7rem; }
+.evento.virtual { border-left-color: var(--pera-success); background: var(--pera-success-bg); color: var(--pera-success); }
+.evento.cancelada { opacity: .55; text-decoration: line-through; }
+.lateral { display: grid; gap: 20px; }
+.proxima { display: flex; flex-direction: column; gap: 4px; width: 100%; padding: 12px 0; border: 0; border-bottom: 1px solid var(--pera-border); background: transparent; text-align: left; }
+.proxima:hover strong { color: var(--pera-primary); }
+.proxima-fecha { color: var(--pera-primary); font-size: var(--pera-text-sm); font-weight: 700; }
+.detalle h3 { margin-top: 0; }
+.detalle p { margin: 8px 0; }
+.aviso { margin-top: 16px; }
+@media(max-width:950px) { .contenido { grid-template-columns: 1fr; } .lateral { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .lateral { grid-template-columns: 1fr; } .calendario { padding: 10px; } .celda { min-height: 70px; } .evento { font-size: .58rem; padding: 3px; } }

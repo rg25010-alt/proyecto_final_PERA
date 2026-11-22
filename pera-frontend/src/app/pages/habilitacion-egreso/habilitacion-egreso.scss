@@ -1,0 +1,25 @@
+.modo-prueba {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 18px;
+  flex-wrap: wrap;
+}
+.modo-prueba p { margin: 5px 0 0; }
+.resumen { margin: 20px 0; }
+.indicador { padding: 20px; display: grid; gap: 8px; }
+.indicador strong { font-size: 1.9rem; color: var(--pera-primary); }
+.seccion { padding: 22px; margin: 20px 0; }
+.filtros { margin: 18px 0; display: flex; flex-wrap: wrap; gap: 14px; }
+.filtros .pera-field { flex: 1; min-width: 190px; }
+.detalle { margin: 18px 0; }
+.detalle > div { display: grid; gap: 8px; }
+.detalle strong { color: var(--pera-primary); }
+.sin-datos { text-align: center; padding: 22px !important; }
+.nota { font-size: .85rem; margin-bottom: 25px; }
+@media (max-width: 700px) {
+  .resumen, .detalle { grid-template-columns: 1fr; }
+  .seccion { padding: 15px; }
+}
