@@ -15,6 +15,7 @@ services:
 
     volumes:
       - pera_data:/var/lib/postgresql/data
+      - ../database:/docker-entrypoint-initdb.d:ro
 
 volumes:
   pera_data:
