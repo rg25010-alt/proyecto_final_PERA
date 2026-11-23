@@ -15,7 +15,25 @@ builder.Services
     .AddQueryType<Query>()
     .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = builder.Environment.IsDevelopment());
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularLocal", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:4200",
+                "http://127.0.0.1:4200"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+
+app.UseCors("AngularLocal");
 
 app.MapGraphQL();
 
