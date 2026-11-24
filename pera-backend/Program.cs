@@ -1,32 +1,51 @@
-using Microsoft.AspNetCore.Authentication.BearerToken;
-using Microsoft.AspNetCore.DataProtection;
+using Microsoft.EntityFrameworkCore;
 using Pera.Backend.Datos;
+using Pera.Backend.GraphQL;
+using Pera.Backend.Seguridad;
 
 var builder = WebApplication.CreateBuilder(args);
 
-if (!builder.Environment.IsDevelopment())
-{
-    throw new InvalidOperationException(
-        "La API usa datos de prueba y solo se puede iniciar en un entorno de desarrollo.");
-}
+var connectionString = builder.Configuration.GetConnectionString("Default")
+    ?? throw new InvalidOperationException("Falta configurar ConnectionStrings:Default");
 
-builder.Services.AddControllers();
-builder.Services.AddDataProtection().UseEphemeralDataProtectionProvider();
-builder.Services.AddAuthentication(BearerTokenDefaults.AuthenticationScheme).AddBearerToken();
+builder.Services.AgregarSeguridadPera(builder.Configuration);
 builder.Services.AddAuthorization();
-builder.Services.AddSingleton<IRepositorioTutorias, RepositorioTutoriasEnMemoria>();
-builder.Services.AddSingleton<IRepositorioExpedientes, RepositorioExpedientesEnMemoria>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<UsuarioActual>();
+builder.Services.AddScoped<ServicioAcceso>();
+
+builder.Services.AddDbContext<PeraDbContext>(options =>
+    options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
+
+builder.Services
+    .AddGraphQLServer()
+    .AddAuthorization()
+    .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
+    .ModifyRequestOptions(opt => opt.IncludeExceptionDetails = builder.Environment.IsDevelopment());
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularLocal", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:4200",
+                "http://127.0.0.1:4200"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
-if (args.Contains("--token-coordinacion"))
-{
-    Console.WriteLine("Token local de Coordinación PERA (vigente durante una hora):");
-    Console.WriteLine(AccesoLocalCoordinacion.Emitir(app.Services));
-}
 
+app.UseCors("AngularLocal");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapGraphQL();
+
 app.Run();

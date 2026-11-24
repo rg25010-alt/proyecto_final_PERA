@@ -1,5 +1,13 @@
 **/.env
+**/.env.*
+!**/.env.example
+**/secrets.json
+
 **/node_modules/
 **/.angular/
+pera-frontend/dist/
+
 **/bin/
 **/obj/
+
+.idea/
