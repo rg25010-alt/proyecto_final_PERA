@@ -26,8 +26,138 @@ public sealed record EstudianteRegistrado(
     string Correo,
     decimal CumActual
 );
+
+public sealed record RegistrarInscripcionInput(
+    string CarnetEstudiante,
+    int IdAsignatura,
+    string PeriodoAcademico
+);
+
+public sealed record InscripcionRegistrada(
+    long IdInscripcion,
+    string CarnetEstudiante,
+    int IdAsignatura,
+    string PeriodoAcademico,
+    DateOnly FechaInscripcion,
+    string Estado,
+    int UvAcumuladas,
+    int UvMaxPermitidas
+);
+
+
+
 public class Mutation
 {
+    [Authorize(Roles = [Roles.Administracion, Roles.Coordinacion, Roles.Jefatura])]
+public async Task<InscripcionRegistrada> RegistrarInscripcionAsync(
+    RegistrarInscripcionInput input,
+    PeraDbContext db,
+    [Service] UsuarioActual usuarioActual,
+    CancellationToken ct)
+{
+    var perfil = await usuarioActual.ObtenerAsync(ct);
+
+    var carnet = input.CarnetEstudiante.Trim();
+    var periodo = input.PeriodoAcademico.Trim();
+
+    if (string.IsNullOrWhiteSpace(carnet))
+        throw new GraphQLException("El carnet es obligatorio.");
+
+    if (string.IsNullOrWhiteSpace(periodo))
+        throw new GraphQLException("El período académico es obligatorio.");
+
+    var estudiante = await db.Estudiantes
+        .AsNoTracking()
+        .Include(e => e.IdCarreraNavigation)
+        .SingleOrDefaultAsync(e => e.Carnet == carnet, ct);
+
+    if (estudiante is null)
+        throw new GraphQLException("El estudiante no existe.");
+
+    if (perfil.Rol == Roles.Jefatura &&
+        estudiante.IdCarreraNavigation.IdDepartamento != perfil.IdDepartamento)
+    {
+        throw new GraphQLException(
+            "Jefatura solo puede inscribir estudiantes de su departamento.");
+    }
+
+    var asignatura = await db.Asignaturas
+        .AsNoTracking()
+        .SingleOrDefaultAsync(a => a.IdAsignatura == input.IdAsignatura, ct);
+
+    if (asignatura is null)
+        throw new GraphQLException("La asignatura no existe.");
+
+    var regla = await db.ReglasUvs
+        .AsNoTracking()
+        .Where(r =>
+            r.Vigente &&
+            estudiante.CumActual >= r.CumMin &&
+            estudiante.CumActual <= r.CumMax)
+        .OrderBy(r => r.CumMin)
+        .FirstOrDefaultAsync(ct);
+
+    if (regla is null)
+        throw new GraphQLException(
+            "No existe una regla de UV vigente para el CUM del estudiante.");
+
+    var yaExiste = await db.Inscripciones.AnyAsync(i =>
+        i.CarnetEstudiante == carnet &&
+        i.IdAsignatura == input.IdAsignatura &&
+        i.PeriodoAcademico == periodo,
+        ct);
+
+    if (yaExiste)
+        throw new GraphQLException(
+            "El estudiante ya tiene registrada esa asignatura en ese período.");
+
+    var uvActuales = await db.Inscripciones
+        .Where(i =>
+            i.CarnetEstudiante == carnet &&
+            i.PeriodoAcademico == periodo &&
+            i.Estado == "Activa")
+        .SumAsync(i => (int?)i.IdAsignaturaNavigation.UnidadesValorativas, ct)
+        ?? 0;
+
+    var uvNuevas = uvActuales + asignatura.UnidadesValorativas;
+
+    if (uvNuevas > regla.UvMax)
+    {
+        throw new GraphQLException(
+            $"La inscripción supera el límite permitido. " +
+            $"UV actuales: {uvActuales}, " +
+            $"UV de la asignatura: {asignatura.UnidadesValorativas}, " +
+            $"máximo permitido: {regla.UvMax}.");
+    }
+
+    await using var tx = await db.IniciarAsync(perfil.IdUsuario, ct);
+
+    var inscripcion = new Pera.Backend.Modelos.Inscripcione
+    {
+        CarnetEstudiante = carnet,
+        IdAsignatura = input.IdAsignatura,
+        PeriodoAcademico = periodo,
+        FechaInscripcion = DateOnly.FromDateTime(DateTime.UtcNow),
+        Estado = "Activa"
+    };
+
+    db.Inscripciones.Add(inscripcion);
+    await db.SaveChangesAsync(ct);
+
+    await tx.CommitAsync(ct);
+
+    return new InscripcionRegistrada(
+        inscripcion.IdInscripcion,
+        inscripcion.CarnetEstudiante,
+        inscripcion.IdAsignatura,
+        inscripcion.PeriodoAcademico,
+        inscripcion.FechaInscripcion,
+        inscripcion.Estado,
+        uvNuevas,
+        regla.UvMax
+    );
+}
+
     [Authorize(Roles = [Roles.Jefatura])]
     public async Task<bool> CambiarEstadoDocenteAsync(long idDocente, bool activo,
         PeraDbContext db, [Service] UsuarioActual usuario, CancellationToken ct)

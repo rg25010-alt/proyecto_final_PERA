@@ -5,6 +5,33 @@ using Pera.Backend.Seguridad;
 
 namespace Pera.Backend.GraphQL;
 
+public sealed record ReglaUvResumen(
+    int IdRegla,
+    decimal CumMin,
+    decimal CumMax,
+    short UvMax,
+    bool Vigente
+);
+
+public sealed record AsignaturaResumen(
+    int IdAsignatura,
+    string Codigo,
+    string Nombre,
+    short UnidadesValorativas
+);
+
+public sealed record InscripcionResumen(
+    long IdInscripcion,
+    string CarnetEstudiante,
+    string Estudiante,
+    int IdAsignatura,
+    string CodigoAsignatura,
+    string Asignatura,
+    short UnidadesValorativas,
+    string PeriodoAcademico,
+    DateOnly FechaInscripcion,
+    string Estado
+);
 public sealed record DepartamentoResumen(int IdDepartamento, string Nombre, bool Activo);
 public sealed record CarreraResumen(
     int IdCarrera,
@@ -181,6 +208,103 @@ public async Task<List<EstudianteResumen>> GetEstudiantes(
             e.IntentosFallidos,
             e.IdCarreraNavigation.NombreCarrera,
             e.IdCarreraNavigation.IdDepartamento
+        ))
+        .ToListAsync(ct);
+}
+
+[Authorize(Roles = [
+    Roles.Administracion,
+    Roles.Coordinacion,
+    Roles.Jefatura,
+    Roles.Docente,
+    Roles.Estudiante
+])]
+public async Task<List<ReglaUvResumen>> GetReglasUv(
+    PeraDbContext db,
+    CancellationToken ct)
+{
+    return await db.ReglasUvs
+        .AsNoTracking()
+        .OrderBy(r => r.CumMin)
+        .Select(r => new ReglaUvResumen(
+            r.IdRegla,
+            r.CumMin,
+            r.CumMax,
+            r.UvMax,
+            r.Vigente
+        ))
+        .ToListAsync(ct);
+}
+
+[Authorize(Roles = [
+    Roles.Administracion,
+    Roles.Coordinacion,
+    Roles.Jefatura,
+    Roles.Docente,
+    Roles.Estudiante
+])]
+public async Task<List<AsignaturaResumen>> GetAsignaturas(
+    PeraDbContext db,
+    CancellationToken ct)
+{
+    return await db.Asignaturas
+        .AsNoTracking()
+        .OrderBy(a => a.Codigo)
+        .Select(a => new AsignaturaResumen(
+            a.IdAsignatura,
+            a.Codigo,
+            a.Nombre,
+            a.UnidadesValorativas
+        ))
+        .ToListAsync(ct);
+}
+
+[Authorize(Roles = [
+    Roles.Administracion,
+    Roles.Coordinacion,
+    Roles.Jefatura,
+    Roles.Docente,
+    Roles.Estudiante
+])]
+public async Task<List<InscripcionResumen>> GetInscripciones(
+    PeraDbContext db,
+    [Service] UsuarioActual usuario,
+    CancellationToken ct)
+{
+    var perfil = await usuario.ObtenerAsync(ct);
+
+    var consulta = db.Inscripciones
+        .AsNoTracking()
+        .AsQueryable();
+
+    if (perfil.Rol == Roles.Estudiante)
+    {
+        consulta = consulta.Where(i =>
+            i.CarnetEstudianteNavigation.IdUsuario == perfil.IdUsuario);
+    }
+
+    if (perfil.Rol is Roles.Jefatura or Roles.Docente)
+    {
+        consulta = consulta.Where(i =>
+            i.CarnetEstudianteNavigation.IdCarreraNavigation.IdDepartamento
+            == perfil.IdDepartamento);
+    }
+
+    return await consulta
+        .OrderByDescending(i => i.FechaInscripcion)
+        .Select(i => new InscripcionResumen(
+            i.IdInscripcion,
+            i.CarnetEstudiante,
+            i.CarnetEstudianteNavigation.IdUsuarioNavigation.Nombres
+                + " "
+                + i.CarnetEstudianteNavigation.IdUsuarioNavigation.Apellidos,
+            i.IdAsignatura,
+            i.IdAsignaturaNavigation.Codigo,
+            i.IdAsignaturaNavigation.Nombre,
+            i.IdAsignaturaNavigation.UnidadesValorativas,
+            i.PeriodoAcademico,
+            i.FechaInscripcion,
+            i.Estado
         ))
         .ToListAsync(ct);
 }
