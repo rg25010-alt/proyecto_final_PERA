@@ -1,0 +1,169 @@
+<main class="pera-page sesion-page">
+  <div class="pera-container">
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">Gestión de tutorías · PERA</p>
+        <h1 class="pera-page-title">Programar sesión</h1>
+        <p class="pera-page-subtitle">Crea o modifica sesiones de tutoría para tus estudiantes asignados.</p>
+      </div>
+      <span class="pera-badge pera-badge--info">● Datos de demostración</span>
+    </header>
+
+    @if (aviso()) {
+      <div class="pera-alert pera-alert--success" role="status">{{ aviso() }}</div>
+    }
+    @if (error()) {
+      <div class="pera-alert pera-alert--danger" role="alert">{{ error() }}</div>
+    }
+
+    <div class="distribucion">
+      <section class="pera-card formulario-card" aria-label="Formulario de sesión">
+        <div class="pera-card__header">
+          <div>
+            <h2 class="pera-card__title">{{ editando() !== null ? 'Modificar tutoría' : 'Nueva tutoría' }}</h2>
+            <p class="pera-card__subtitle">Los campos marcados con * son obligatorios.</p>
+          </div>
+          <span class="paso">01 / 02</span>
+        </div>
+        <form (ngSubmit)="guardar()" #sesionForm="ngForm" novalidate>
+          <div class="seccion-form">
+            <h3>Información académica</h3>
+            <div class="pera-form-grid campos">
+              <div class="pera-field campo-completo">
+                <label for="estudiante">Estudiante *</label>
+                <select class="pera-select" id="estudiante" name="carnet" [ngModel]="formulario.carnet"
+                  (ngModelChange)="seleccionarEstudiante($event)" required>
+                  <option value="">Selecciona un estudiante</option>
+                  @for (e of estudiantes; track e.carnet) {
+                    <option [value]="e.carnet">{{ e.nombre }} · {{ e.carnet }}</option>
+                  }
+                </select>
+              </div>
+              <div class="pera-field campo-completo">
+                <label for="materia">Asignatura o área de refuerzo *</label>
+                <select class="pera-select" id="materia" name="materia" [(ngModel)]="formulario.materia" required>
+                  <option value="">Selecciona una asignatura</option>
+                  @for (materia of materias; track materia) { <option [value]="materia">{{ materia }}</option> }
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="seccion-form">
+            <h3>Fecha y horario</h3>
+            <div class="pera-form-grid campos">
+              <div class="pera-field campo-completo">
+                <label for="fecha">Fecha de tutoría *</label>
+                <input class="pera-input" type="date" id="fecha" name="fecha" [min]="hoy"
+                  [(ngModel)]="formulario.fecha" required />
+              </div>
+              <div class="pera-field">
+                <label for="inicio">Hora de inicio *</label>
+                <input class="pera-input" type="time" id="inicio" name="inicio"
+                  [(ngModel)]="formulario.inicio" required />
+              </div>
+              <div class="pera-field">
+                <label for="fin">Hora de finalización *</label>
+                <input class="pera-input" type="time" id="fin" name="fin"
+                  [(ngModel)]="formulario.fin" required />
+              </div>
+            </div>
+          </div>
+
+          <div class="seccion-form">
+            <h3>Modalidad y detalles</h3>
+            <div class="pera-field">
+              <label>Modalidad *</label>
+              <div class="modalidades">
+                <button type="button" class="pera-btn pera-btn--outline modalidad" [class.activa]="formulario.modalidad === 'Presencial'"
+                  [attr.aria-pressed]="formulario.modalidad === 'Presencial'"
+                  (click)="cambiarModalidad('Presencial')">Presencial</button>
+                <button type="button" class="pera-btn pera-btn--outline modalidad" [class.activa]="formulario.modalidad === 'Virtual'"
+                  [attr.aria-pressed]="formulario.modalidad === 'Virtual'"
+                  (click)="cambiarModalidad('Virtual')">Virtual</button>
+              </div>
+            </div>
+            <div class="pera-field">
+              <label for="ubicacion">{{ formulario.modalidad === 'Virtual' ? 'Enlace de reunión *' : 'Aula o ubicación *' }}</label>
+              <input class="pera-input" id="ubicacion" name="ubicacion"
+                [type]="formulario.modalidad === 'Virtual' ? 'url' : 'text'"
+                [placeholder]="formulario.modalidad === 'Virtual' ? 'https://meet.google.com/...' : 'Ej. Aula B-12'"
+                [(ngModel)]="formulario.ubicacion" required />
+            </div>
+            <div class="pera-field">
+              <label for="descripcion">Objetivo o temas a tratar</label>
+              <textarea class="pera-textarea" id="descripcion" name="descripcion" rows="3"
+                placeholder="Describe brevemente los temas de la tutoría..."
+                [(ngModel)]="formulario.descripcion"></textarea>
+            </div>
+          </div>
+          <div class="pera-form-actions">
+            <button class="pera-btn pera-btn--outline" type="button" (click)="cancelarEdicion()">Limpiar formulario</button>
+            <button class="pera-btn" type="submit">{{ editando() !== null ? 'Guardar cambios' : 'Programar sesión' }}</button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="lateral">
+        <section class="pera-card">
+          <p class="pera-eyebrow">Resumen</p>
+          <h2 class="pera-card__title">Sesiones registradas</h2>
+          <div class="pera-grid pera-grid--2 estadisticas">
+            <div><strong>{{ sesiones().length }}</strong><span>Total</span></div>
+            <div><strong>{{ sesionesFiltradas().length }}</strong><span>En el filtro</span></div>
+          </div>
+          <p class="nota">Los cambios se guardan solo en la memoria del navegador mientras esta pantalla permanece abierta. No se envían al backend.</p>
+        </section>
+        <section class="pera-card ayuda">
+          <h2 class="pera-card__title">Antes de programar</h2>
+          <ul>
+            <li>Selecciona al estudiante asignado.</li>
+            <li>Define la asignatura y un horario válido.</li>
+            <li>Indica el aula o enlace de reunión.</li>
+            <li>Revisa las sesiones existentes antes de guardar.</li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+
+    <section class="pera-card listado" aria-label="Listado de tutorías">
+      <div class="pera-card__header listado-cabecera">
+        <div>
+          <h2 class="pera-card__title">Mis sesiones de tutoría</h2>
+          <p class="pera-card__subtitle">Consulta, modifica o cancela las sesiones de prueba.</p>
+        </div>
+        <div class="pera-field">
+          <label for="filtro-estado">Estado</label>
+          <select class="pera-select" id="filtro-estado" [value]="filtro()" (change)="filtro.set($any($event.target).value)">
+            <option value="Todas">Todas</option>
+            <option value="Programada">Programadas</option>
+            <option value="Finalizada">Finalizadas</option>
+            <option value="Cancelada">Canceladas</option>
+          </select>
+        </div>
+      </div>
+      <div class="pera-table-wrap">
+        <table class="pera-table">
+          <thead><tr><th>Estudiante</th><th>Asignatura</th><th>Fecha y hora</th><th>Modalidad</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            @for (s of sesionesFiltradas(); track s.id) {
+              <tr>
+                <td><strong>{{ s.estudiante }}</strong><small>{{ s.carnet }}</small></td>
+                <td>{{ s.materia }}</td>
+                <td>{{ s.fecha | date:'dd/MM/yyyy' }}<small>{{ s.inicio }} – {{ s.fin }}</small></td>
+                <td>{{ s.modalidad }}</td>
+                <td><span class="pera-badge pera-badge--success" [class.pera-badge--danger]="s.estado === 'Cancelada'">{{ s.estado }}</span></td>
+                <td><div class="pera-table__actions">
+                  <button type="button" class="pera-btn pera-btn--outline pera-btn--sm" (click)="editar(s)" [disabled]="s.estado !== 'Programada'">Editar</button>
+                  <button type="button" class="pera-btn pera-btn--ghost pera-btn--sm" (click)="cancelarSesion(s)" [disabled]="s.estado !== 'Programada'">Cancelar</button>
+                </div></td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="sin-datos">No hay sesiones con el estado seleccionado.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>

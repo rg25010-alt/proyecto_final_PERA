@@ -1,0 +1,74 @@
+<main class="pera-container pera-page">
+  <div>
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">Sistema de tutorías · PERA</p>
+        <h1 class="pera-page-title">Notificaciones</h1>
+        <p class="pera-page-subtitle">Consulta avisos de sesiones y alertas académicas según tu rol.</p>
+      </div>
+      <span class="pera-badge pera-badge--info">Datos ficticios</span>
+    </header>
+
+    <section class="pera-card resumen">
+      <div>
+        <p class="pera-muted">Notificaciones sin leer</p>
+        <strong>{{ pendientes() }}</strong>
+        <p class="pera-muted">Avisos pendientes de revisar</p>
+      </div>
+    </section>
+
+    <section class="pera-card">
+      <div class="pera-filter-bar">
+        <div class="pera-field">
+          <label class="pera-label" for="rol">Vista de usuario (demostración)</label>
+          <select id="rol" class="pera-select" [value]="rol()" (change)="rol.set($any($event.target).value)">
+            <option>Estudiante</option>
+            <option>Docente Tutor</option>
+            <option>Coordinación PERA</option>
+          </select>
+        </div>
+        <div class="pera-field">
+          <label class="pera-label" for="filtro">Mostrar</label>
+          <select id="filtro" class="pera-select" [value]="filtro()" (change)="filtro.set($any($event.target).value)">
+            <option>Todas</option>
+            <option>No leídas</option>
+            <option>Leídas</option>
+          </select>
+        </div>
+        <button type="button" class="pera-btn pera-btn--outline" (click)="marcarTodas()"
+          [disabled]="pendientes() === 0">
+          Marcar todas como leídas
+        </button>
+      </div>
+
+      <div class="pera-list lista">
+        <div class="pera-list__item aviso" *ngFor="let aviso of visibles()" [class.sin-leer]="!aviso.leida">
+          <div class="icono" aria-hidden="true">{{ aviso.tipo === 'Alerta temprana' }}</div>
+          <div class="contenido">
+            <div class="encabezado-aviso">
+              <h2>{{ aviso.titulo }}</h2>
+              <span class="fecha">{{ aviso.fecha }}</span>
+            </div>
+            <p>{{ aviso.mensaje }}</p>
+            <div class="pie-aviso">
+              <span class="pera-badge pera-badge--info">{{ aviso.tipo }}</span>
+              <span class="pera-badge pera-badge--success" *ngIf="aviso.leida">Leída</span>
+              <span class="pera-badge pera-badge--warning" *ngIf="!aviso.leida">No leída</span>
+              <button type="button" class="pera-btn pera-btn--outline pera-btn--sm"
+                *ngIf="!aviso.leida" (click)="marcarLeida(aviso.id)">
+                Marcar como leída
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="pera-empty" *ngIf="visibles().length === 0">
+          <h2>No hay notificaciones</h2>
+          <p>No encontramos avisos para el filtro seleccionado.</p>
+        </div>
+      </div>
+    </section>
+
+    <p class="nota">Esta pantalla es una demostración visual. Los cambios no se guardan al recargar la página.</p>
+  </div>
+</main>

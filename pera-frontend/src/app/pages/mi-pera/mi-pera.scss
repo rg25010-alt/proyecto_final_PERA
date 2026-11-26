@@ -1,0 +1,17 @@
+.perfil { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+.avatar { width: 66px; height: 66px; border-radius: var(--pera-radius-lg); font-size: var(--pera-text-lg); }
+.perfil h2 { margin: 0; }
+.perfil p { margin: 3px 0; }
+.perfil > .pera-badge { margin-left: auto; }
+.indicadores { margin-bottom: 22px; }
+.indicadores p { margin: 0; color: var(--pera-text-muted); font-size: var(--pera-text-sm); }
+.indicadores strong { display: block; font-size: var(--pera-text-2xl); color: var(--pera-primary); }
+.indicadores small { color: var(--pera-text-muted); }
+.titulo-seccion { flex-wrap: wrap; }
+.titulo-seccion p { margin: 4px 0 0; }
+.tutor { display: flex; gap: 14px; padding: 16px; border: 1px solid var(--pera-border); border-radius: var(--pera-radius); }
+.icono-tutor { padding: 10px; border-radius: var(--pera-radius); background: var(--pera-primary-soft); }
+.tutor h3 { margin: 0 0 4px; font-size: var(--pera-text-base); }
+.tutor p { margin: 0 0 6px; color: var(--pera-text-muted); }
+.tutor a { overflow-wrap: anywhere; }
+@media(max-width:750px) { .perfil { flex-wrap: wrap; } .perfil > .pera-badge { margin-left: 0; } }

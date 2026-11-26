@@ -1,0 +1,22 @@
+.distribucion { display: grid; grid-template-columns: minmax(0,1.75fr) minmax(250px,.8fr); gap: 22px; align-items: start; }
+.lateral { display: grid; gap: 20px; }
+.seccion-form { display: grid; gap: 16px; padding: 20px 0; border-top: 1px solid var(--pera-border); }
+.seccion-form h3 { margin: 0; color: var(--pera-primary); font-size: var(--pera-text-base); }
+.campo-completo { grid-column: 1/-1; }
+.modalidades { display: flex; gap: 10px; flex-wrap: wrap; }
+.modalidad.activa { background: var(--pera-primary-soft); border-color: var(--pera-primary); }
+.pera-form-actions { border-top: 1px solid var(--pera-border); padding-top: 18px; }
+.estadisticas { margin-top: 18px; }
+.estadisticas div { display: grid; gap: 4px; padding: 14px; background: var(--pera-primary-soft); border-radius: var(--pera-radius); }
+.estadisticas strong { font-size: var(--pera-text-xl); color: var(--pera-primary); }
+.estadisticas span { font-size: var(--pera-text-sm); color: var(--pera-text-muted); }
+.nota { margin-top: 16px; color: var(--pera-text-muted); font-size: var(--pera-text-sm); }
+.ayuda ul { padding-left: 20px; color: var(--pera-text-muted); }
+.listado { margin-top: 22px; }
+.listado-cabecera { flex-wrap: wrap; }
+.listado-cabecera .pera-field { min-width: 170px; }
+.pera-table td small { display: block; color: var(--pera-text-muted); }
+.sin-datos { text-align: center; }
+.paso { color: var(--pera-text-muted); font-size: var(--pera-text-sm); }
+@media(max-width:920px) { .distribucion { grid-template-columns: 1fr; } .lateral { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .lateral { grid-template-columns: 1fr; } }

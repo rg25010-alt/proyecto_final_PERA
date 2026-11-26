@@ -1,0 +1,103 @@
+<main class="pera-container pera-page">
+  <div>
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">Jefatura de Departamento · PERA</p>
+        <h1 class="pera-page-title">Reportes académicos</h1>
+        <p class="pera-page-subtitle">Consulta resultados, asistencia e indicadores de los estudiantes.</p>
+      </div>
+      <span class="pera-badge pera-badge--info">Datos ficticios</span>
+    </header>
+
+    <section class="pera-card pera-filter-bar filtros">
+      <div class="pera-field">
+        <label for="ciclo">Ciclo académico</label>
+        <select id="ciclo" class="pera-select" [value]="ciclo()" (change)="ciclo.set($any($event.target).value)">
+          <option value="Todos">Todos</option>
+          <option value="2026-I">2026-I</option>
+          <option value="2026-II">2026-II</option>
+        </select>
+      </div>
+      <div class="pera-field">
+        <label for="carrera">Carrera</label>
+        <select id="carrera" class="pera-select" [value]="carrera()" (change)="carrera.set($any($event.target).value)">
+          <option value="Todas">Todas</option>
+          <option value="Sistemas">Sistemas</option>
+          <option value="Industrial">Industrial</option>
+        </select>
+      </div>
+      <button class="pera-btn pera-btn--outline" type="button" (click)="limpiarFiltros()">Limpiar filtros</button>
+    </section>
+
+    <section class="pera-grid pera-grid--4 indicadores" aria-label="Indicadores académicos">
+      <div class="pera-stat">
+        <p>Estudiantes evaluados</p>
+        <strong>{{ datosFiltrados().length }}</strong>
+        <small>En el filtro seleccionado</small>
+      </div>
+      <div class="pera-stat">
+        <p>Aprobados</p>
+        <strong class="verde">{{ aprobados() }}</strong>
+        <small>Nota de 6.0 o más (ejemplo)</small>
+      </div>
+      <div class="pera-stat">
+        <p>Reprobados</p>
+        <strong class="rojo">{{ reprobados() }}</strong>
+        <small>Nota menor de 6.0 (ejemplo)</small>
+      </div>
+      <div class="pera-stat">
+        <p>Asistencia promedio</p>
+        <strong>{{ promedioAsistencia() }}%</strong>
+        <small>Porcentaje de asistencia</small>
+      </div>
+    </section>
+
+    <section class="pera-card pera-section bloque">
+      <h2 class="pera-card__title">Resumen de resultados</h2>
+      <p class="pera-muted">Porcentaje de estudiantes aprobados en los datos de prueba.</p>
+      <div class="pera-progress">
+        <div class="pera-progress__bar pera-progress__bar--success" [style.width.%]="porcentajeAprobados()"></div>
+      </div>
+      <p class="resumen-texto">{{ porcentajeAprobados() }}% aprobados · {{ 100 - porcentajeAprobados() }}% reprobados</p>
+    </section>
+
+    <section class="pera-card pera-section bloque">
+      <h2 class="pera-card__title">Detalle de estudiantes</h2>
+      <p class="pera-muted">Resultados filtrados por ciclo y carrera.</p>
+      <div class="pera-table-wrap">
+        <table class="pera-table">
+          <thead>
+            <tr>
+              <th>Carnet</th>
+              <th>Estudiante</th>
+              <th>Carrera</th>
+              <th>Ciclo</th>
+              <th>Nota</th>
+              <th>Asistencia</th>
+              <th>Resultado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let estudiante of datosFiltrados()">
+              <td>{{ estudiante.carnet }}</td>
+              <td>{{ estudiante.nombre }}</td>
+              <td>{{ estudiante.carrera }}</td>
+              <td>{{ estudiante.ciclo }}</td>
+              <td>{{ estudiante.nota | number:'1.1-1' }}</td>
+              <td>{{ estudiante.asistencia }}%</td>
+              <td>
+                <span class="pera-badge pera-badge--success" [class.pera-badge--danger]="estudiante.nota < 6">
+                  {{ estudiante.nota >= 6 ? 'Aprobado' : 'Reprobado' }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="datosFiltrados().length === 0">
+              <td colspan="7" class="sin-datos">No hay datos para los filtros seleccionados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <p class="advertencia">Los datos, las notas y el criterio de aprobación son ejemplos para el diseño. Los valores reales deberán definirse con el equipo y el backend.</p>
+  </div>
+</main>
