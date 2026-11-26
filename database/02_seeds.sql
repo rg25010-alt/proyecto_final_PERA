@@ -206,6 +206,7 @@ ON CONFLICT (nombre_carrera) DO NOTHING;
 -- USUARIOS DE PRUEBA DEL SISTEMA PERA
 -- FASE 1 - PUNTO 1
 -- Solo para ambiente de desarrollo
+-- CONTRASEÑA DE PRUEBA: PERA-Demo-2026!SoloPruebas
 -- ==========================================
 
 INSERT INTO usuarios (
