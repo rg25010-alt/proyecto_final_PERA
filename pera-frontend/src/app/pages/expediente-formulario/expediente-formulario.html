@@ -29,8 +29,11 @@
             <label class="pera-field"><span class="pera-label">Carné</span>
               <input class="pera-input" name="carnet" type="text" required pattern="[A-Za-z0-9]{1,20}" maxlength="20" placeholder="Ej. AR26010">
             </label>
-            <label class="pera-field"><span class="pera-label">Nombre completo</span>
-              <input class="pera-input" name="nombre" type="text" required maxlength="150" pattern=".*\S.*">
+            <label class="pera-field"><span class="pera-label">Nombres</span>
+              <input class="pera-input" name="nombres" type="text" required maxlength="150" pattern=".*\S.*">
+            </label>
+            <label class="pera-field"><span class="pera-label">Apellidos</span>
+              <input class="pera-input" name="apellidos" type="text" required maxlength="150" pattern=".*\S.*">
             </label>
           </div>
           <label class="pera-field"><span class="pera-label">Carrera</span>
@@ -39,6 +42,14 @@
               @for (carrera of carreras(); track carrera.id) { <option [value]="carrera.id">{{ carrera.nombre }}</option> }
             </select>
           </label>
+          <div class="pera-form-grid">
+            <label class="pera-field"><span class="pera-label">Correo institucional</span>
+              <input class="pera-input" name="correo" type="email" required maxlength="160" placeholder="nombre@ues.edu.sv">
+            </label>
+            <label class="pera-field"><span class="pera-label">Contraseña inicial</span>
+              <input class="pera-input" name="clave" type="password" required minlength="8" autocomplete="new-password">
+            </label>
+          </div>
           @if (avisoCatalogo()) {
             <div role="alert" class="pera-alert pera-alert--warning">{{ avisoCatalogo() }}
               <button type="button" class="pera-btn pera-btn--outline pera-btn--sm" (click)="cargarCarreras()">Reintentar</button>

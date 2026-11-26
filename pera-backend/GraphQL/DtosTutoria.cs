@@ -14,6 +14,10 @@ public sealed record AsignacionTutoriaResumen(
     long IdAsignacion, string CarnetEstudiante, string PeriodoAcademico,
     short NumeroIntento, decimal? NotaFinal, string EstadoPera, int CantidadTutores);
 
+public sealed record TutorAsignadoResumen(
+    long IdAsignacion, long IdDocente, string Nombres, string Apellidos,
+    string Departamento, string AreaRefuerzo, bool Activo, DateOnly FechaAsignacion);
+
 public sealed record CerrarAsignacionInput(long IdAsignacion, decimal NotaFinal);
 
 public sealed record AsignacionCerrada(long IdAsignacion, decimal NotaFinal, string EstadoPera);

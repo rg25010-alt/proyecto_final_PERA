@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -47,15 +46,18 @@ export class ExpedienteFormulario implements OnInit {
     this.guardando.set(true);
     this.api.registrar({
       carnet: String(campos.get('carnet')).trim().toUpperCase(),
-      nombre: String(campos.get('nombre')).trim(),
+      nombre: String(campos.get('nombres')).trim(),
+      apellidos: String(campos.get('apellidos')).trim(),
+      correo: String(campos.get('correo')).trim(),
+      clave: String(campos.get('clave')),
       carreraId: Number(campos.get('carreraId')),
       cum: Number(campos.get('cum')),
     }).pipe(finalize(() => this.guardando.set(false))).subscribe({
       next: expediente => this.registrado.set(expediente),
-      error: (respuesta: HttpErrorResponse) => {
-        const mensajes = Object.values(respuesta.error?.errors ?? {}).flat().join(' ');
-        this.error.set(respuesta.status === 409 ? 'Ya existe un expediente con este carné.'
-          : mensajes || respuesta.error?.mensaje || 'No se pudo registrar el expediente. Volvé a intentarlo.');
+      error: (respuesta: unknown) => {
+        this.error.set(respuesta instanceof Error
+          ? respuesta.message
+          : 'No se pudo registrar el expediente. Volvé a intentarlo.');
       },
     });
   }

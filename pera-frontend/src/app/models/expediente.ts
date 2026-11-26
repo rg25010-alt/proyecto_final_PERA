@@ -8,6 +8,10 @@ export interface NuevoExpediente {
   nombre: string;
   carreraId: number;
   cum: number;
+  apellidos?: string;
+  correo?: string;
+  clave?: string;
+  correoContacto?: string | null;
 }
 
 export interface Expediente extends NuevoExpediente {

@@ -10,10 +10,16 @@
           <span class="pera-label">Carné</span>
           <input class="pera-input" name="carnet" required maxlength="20" pattern="[A-Za-z0-9]+" placeholder="Ej. PR26001">
         </label>
-        <label class="pera-field">
-          <span class="pera-label">Nombre completo</span>
-          <input class="pera-input" name="nombre" required maxlength="150" pattern=".*\S.*">
-        </label>
+        <div class="pera-form-grid">
+          <label class="pera-field">
+            <span class="pera-label">Nombres</span>
+            <input class="pera-input" name="nombres" required maxlength="150" pattern=".*\S.*">
+          </label>
+          <label class="pera-field">
+            <span class="pera-label">Apellidos</span>
+            <input class="pera-input" name="apellidos" required maxlength="150" pattern=".*\S.*">
+          </label>
+        </div>
         <div class="pera-form-grid">
           <label class="pera-field">
             <span class="pera-label">Carrera</span>
@@ -27,6 +33,16 @@
           <label class="pera-field">
             <span class="pera-label">CUM actual</span>
             <input class="pera-input" type="number" name="cum" inputmode="decimal" min="0" max="10" step="0.01" required>
+          </label>
+        </div>
+        <div class="pera-form-grid">
+          <label class="pera-field">
+            <span class="pera-label">Correo institucional</span>
+            <input class="pera-input" name="correo" type="email" required maxlength="160" placeholder="nombre@ues.edu.sv">
+          </label>
+          <label class="pera-field">
+            <span class="pera-label">Contraseña inicial</span>
+            <input class="pera-input" name="clave" type="password" required minlength="8" autocomplete="new-password">
           </label>
         </div>
         @if (avisoCatalogo()) {

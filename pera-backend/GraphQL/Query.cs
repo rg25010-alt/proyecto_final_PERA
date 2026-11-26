@@ -495,4 +495,38 @@ public async Task<List<InscripcionResumen>> GetInscripciones(
                 n.EstadoEnvio, n.CarnetEstudiante, n.IdSesion))
             .ToListAsync(ct);
     }
+
+    [Authorize(Roles = [Roles.Administracion, Roles.Coordinacion, Roles.Jefatura, Roles.Docente, Roles.Estudiante])]
+    public async Task<List<TutorAsignadoResumen>> GetTutoresAsignadosAsync(string carnet,
+        PeraDbContext db, [Service] UsuarioActual usuarioActual, CancellationToken ct)
+    {
+        var perfil = await usuarioActual.ObtenerAsync(ct);
+        var filtro = carnet.Trim().ToUpperInvariant();
+
+        if (perfil.Rol is Roles.Estudiante && await CarnetAsync(db, perfil, ct) != filtro)
+            return [];
+
+        var consulta = db.AsignacionDocentes.AsNoTracking()
+            .Where(ad => ad.Activo && ad.IdAsignacionNavigation.CarnetEstudiante == filtro);
+
+        if (perfil.Rol is Roles.Jefatura)
+        {
+            consulta = consulta.Where(ad =>
+                ad.IdAsignacionNavigation.CarnetEstudianteNavigation
+                    .IdCarreraNavigation.IdDepartamento == perfil.IdDepartamento);
+        }
+
+        return await consulta
+            .OrderBy(ad => ad.FechaAsignacion)
+            .Select(ad => new TutorAsignadoResumen(
+                ad.IdAsignacion,
+                ad.IdDocente,
+                ad.IdDocenteNavigation.IdUsuarioNavigation.Nombres,
+                ad.IdDocenteNavigation.IdUsuarioNavigation.Apellidos,
+                ad.IdDocenteNavigation.IdDepartamentoNavigation.Nombre,
+                ad.AreaRefuerzo,
+                ad.Activo,
+                ad.FechaAsignacion))
+            .ToListAsync(ct);
+    }
 }

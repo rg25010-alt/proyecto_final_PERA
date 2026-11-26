@@ -1,21 +1,11 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { Acceso, PerfilAcceso, Rol } from './acceso';
+import { ServicioGraphQL, SesionGraphQL } from '../../services/graphql';
 
 interface RespuestaLogin {
-  data?: {
-    login?: {
-      accessToken: string;
-      accessTokenExpiraEn: string;
-      refreshToken: string;
-      refreshTokenExpiraEn: string;
-    };
-  };
-  errors?: {
-    message: string;
-  }[];
+  login: SesionGraphQL;
 }
 
 @Injectable()
@@ -25,7 +15,7 @@ export class AccesoGraphQL extends Acceso {
 
   override readonly perfil = this._perfil.asReadonly();
 
-  constructor(private readonly http: HttpClient) {
+  constructor(private readonly graph: ServicioGraphQL) {
     super();
 
     this.restaurarSesion();
@@ -50,48 +40,16 @@ export class AccesoGraphQL extends Acceso {
     try {
 
       const respuesta = await firstValueFrom(
-        this.http.post<RespuestaLogin>(
-          'http://127.0.0.1:5080/graphql',
-          {
-            query,
-            variables: {
-              correo,
-              clave
-            }
-          }
-        )
+        this.graph.post<RespuestaLogin>(query, { correo, clave }, false)
       );
 
-      if (respuesta.errors?.length) {
-        console.error(respuesta.errors);
-        return false;
-      }
-
-      const sesion = respuesta.data?.login;
+      const sesion = respuesta.login;
 
       if (!sesion) {
         return false;
       }
 
-      localStorage.setItem(
-        'pera_access_token',
-        sesion.accessToken
-      );
-
-      localStorage.setItem(
-        'pera_refresh_token',
-        sesion.refreshToken
-      );
-
-      localStorage.setItem(
-        'pera_access_expira',
-        sesion.accessTokenExpiraEn
-      );
-
-      localStorage.setItem(
-        'pera_refresh_expira',
-        sesion.refreshTokenExpiraEn
-      );
+      this.graph.guardarSesion(sesion);
 
       const datos = this.decodificarJwt(sesion.accessToken);
 
@@ -127,15 +85,25 @@ export class AccesoGraphQL extends Acceso {
   }
 
   override async salir(): Promise<void> {
+    const token = localStorage.getItem('pera_refresh_token');
+
+    if (token) {
+      try {
+        await firstValueFrom(this.graph.post(
+          'mutation Logout($token: String!) { logout(token: $token) }',
+          { token },
+          false
+        ));
+      } catch {
+        // Se cierra la sesión local aunque el backend no responda.
+      }
+    }
+
     this.limpiarSesion();
   }
 
   private limpiarSesion(): void {
-    localStorage.removeItem('pera_access_token');
-    localStorage.removeItem('pera_refresh_token');
-    localStorage.removeItem('pera_access_expira');
-    localStorage.removeItem('pera_refresh_expira');
-
+    this.graph.limpiarSesion();
     this._perfil.set(null);
   }
 
