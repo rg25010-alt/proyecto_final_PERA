@@ -23,14 +23,18 @@ public sealed class ServicioAcceso(PeraDbContext db, ServicioTokens tokens)
 
         var usuario = await db.Usuarios.AsNoTracking()
             .Where(u => u.Correo.ToLower() == direccion)
-            .Select(u => new { u.IdUsuario, u.Activo, u.ClaveHash, Rol = u.IdRolNavigation.Codigo })
+            .Select(u => new {
+                u.IdUsuario, u.Activo, u.ClaveHash, Rol = u.IdRolNavigation.Codigo,
+                u.Nombres, u.Apellidos
+            })
             .SingleOrDefaultAsync(ct);
 
         var coincide = Claves.Verificar(clave, usuario?.ClaveHash ?? HashDeComparacion);
         if (!coincide || usuario is null || !usuario.Activo) return null;
 
         await using var tx = await db.IniciarAsync(usuario.IdUsuario, ct);
-        var sesion = await EmitirAsync(usuario.IdUsuario, usuario.Rol, null, ct);
+        var nombre = usuario.Nombres + " " + usuario.Apellidos;
+        var sesion = await EmitirAsync(usuario.IdUsuario, usuario.Rol, nombre, null, ct);
         await tx.CommitAsync(ct);
         return sesion;
     }
@@ -51,9 +55,14 @@ public sealed class ServicioAcceso(PeraDbContext db, ServicioTokens tokens)
         if (reclamados != 1) return null;
 
         var datos = await anterior.AsTracking()
-            .Select(t => new { Token = t, Rol = t.IdUsuarioNavigation.IdRolNavigation.Codigo })
+            .Select(t => new {
+                Token = t, Rol = t.IdUsuarioNavigation.IdRolNavigation.Codigo,
+                t.IdUsuarioNavigation.Nombres, t.IdUsuarioNavigation.Apellidos
+            })
             .SingleAsync(ct);
-        var sesion = await EmitirAsync(datos.Token.IdUsuario, datos.Rol, datos.Token, ct);
+        var nombre = datos.Nombres + " " + datos.Apellidos;
+        var sesion = await EmitirAsync(
+            datos.Token.IdUsuario, datos.Rol, nombre, datos.Token, ct);
         await transaccion.CommitAsync(ct);
         return sesion;
     }
@@ -86,9 +95,9 @@ public sealed class ServicioAcceso(PeraDbContext db, ServicioTokens tokens)
             .Select(t => (long?)t.IdUsuario).SingleOrDefaultAsync(ct);
 
     private async Task<SesionEmitida> EmitirAsync(long idUsuario, string rol,
-        RefreshToken? anterior, CancellationToken ct)
+        string nombre, RefreshToken? anterior, CancellationToken ct)
     {
-        var acceso = tokens.CrearAcceso(idUsuario, rol);
+        var acceso = tokens.CrearAcceso(idUsuario, rol, nombre);
         var renovacion = tokens.CrearRenovacion();
         var nuevo = new RefreshToken
         {

@@ -279,3 +279,23 @@ JOIN roles r
 LEFT JOIN departamentos d
     ON d.nombre = v.nombre_departamento
 ON CONFLICT DO NOTHING;
+
+-- ==========================================
+-- FASE 4 - DATOS BASE PARA VALIDACION DE UV
+-- ==========================================
+
+INSERT INTO reglas_uv (cum_min, cum_max, uv_max, vigente)
+VALUES
+    (0.00, 3.99, 8, true),
+    (4.00, 6.99, 12, true),
+    (7.00, 10.00, 16, true)
+ON CONFLICT DO NOTHING;
+
+INSERT INTO asignaturas (codigo, nombre, unidades_valorativas)
+VALUES
+    ('MAT101', 'Matemática I', 4),
+    ('LEN101', 'Lenguaje y Comunicación I', 3),
+    ('PRO101', 'Programación I', 5),
+    ('BD101', 'Bases de Datos I', 4),
+    ('EST101', 'Estadística I', 3)
+ON CONFLICT (codigo) DO NOTHING;
