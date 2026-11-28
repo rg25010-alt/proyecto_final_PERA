@@ -10,7 +10,8 @@ namespace Pera.Backend.Seguridad;
 public sealed class ServicioTokens(SymmetricSecurityKey clave, string emisor, string audiencia,
     TimeSpan vigenciaAcceso, TimeSpan vigenciaRenovacion)
 {
-    public (string Token, DateTime ExpiraEn) CrearAcceso(long idUsuario, string codigoRol)
+    public (string Token, DateTime ExpiraEn) CrearAcceso(
+        long idUsuario, string codigoRol, string nombre)
     {
         var ahora = DateTime.UtcNow;
         var expira = ahora.Add(vigenciaAcceso);
@@ -18,6 +19,7 @@ public sealed class ServicioTokens(SymmetricSecurityKey clave, string emisor, st
         [
             new Claim(JwtRegisteredClaimNames.Sub, idUsuario.ToString(CultureInfo.InvariantCulture)),
             new Claim("role", codigoRol),
+            new Claim("name", nombre),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N"))
         ], ahora, expira, new SigningCredentials(clave, SecurityAlgorithms.HmacSha256));
         return (new JwtSecurityTokenHandler().WriteToken(jwt), jwt.ValidTo);

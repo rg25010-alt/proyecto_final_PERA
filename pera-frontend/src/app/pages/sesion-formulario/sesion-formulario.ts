@@ -1,14 +1,28 @@
-import { Component, computed, signal } from '@angular/core';
+
+import { Component, computed, signal, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { firstValueFrom } from 'rxjs';
+import { ServicioTutorias, EstudianteSesion } from '../../services/tutorias';
 
 type Modalidad = 'Virtual' | 'Presencial';
-type Estado = 'Programada' | 'Finalizada' | 'Cancelada';
+
+type Estado = 'Borrador' | 'Programada' | 'Finalizada' | 'Cancelada';
+
 interface Sesion {
-  id: number; estudiante: string; carnet: string; materia: string;
-  fecha: string; inicio: string; fin: string; modalidad: Modalidad;
-  ubicacion: string; descripcion: string; estado: Estado;
+  id: number;
+  estudiante: string;
+  carnet: string;
+  materia: string;
+  fecha: string;
+  inicio: string;
+  fin: string;
+  modalidad: Modalidad;
+  ubicacion: string;
+  descripcion: string;
+  estado: Estado;
 }
+
 type Formulario = Omit<Sesion, 'id' | 'estado'>;
 
 @Component({
@@ -17,102 +31,344 @@ type Formulario = Omit<Sesion, 'id' | 'estado'>;
   templateUrl: './sesion-formulario.html',
   styleUrl: './sesion-formulario.scss',
 })
-export class SesionFormulario {
-  readonly hoy = new Date().toLocaleDateString('en-CA');
-  readonly estudiantes = [
-    { carnet: 'LM23001', nombre: 'María López Martínez' },
-    { carnet: 'CR22018', nombre: 'Carlos Ramírez' },
-    { carnet: 'AP24007', nombre: 'Ana Pérez' },
-    { carnet: 'JG23042', nombre: 'José García' },
-  ];
-  readonly materias = ['Matemática I', 'Física I', 'Programación I', 'Base de Datos', 'Estadística'];
-  readonly sesiones = signal<Sesion[]>([
-    { id: 1, estudiante: 'María López Martínez', carnet: 'LM23001', materia: 'Matemática I',
-      fecha: this.fechaDemo(2), inicio: '09:00', fin: '10:00', modalidad: 'Virtual',
-      ubicacion: 'https://meet.google.com/ejemplo-pera', descripcion: 'Repaso de funciones', estado: 'Programada' },
-    { id: 2, estudiante: 'Carlos Ramírez', carnet: 'CR22018', materia: 'Física I',
-      fecha: this.fechaDemo(4), inicio: '14:00', fin: '15:00', modalidad: 'Presencial',
-      ubicacion: 'Aula B-12', descripcion: 'Ejercicios de cinemática', estado: 'Programada' },
-  ]);
+export class SesionFormulario implements OnInit {
+
+  private readonly servicio = inject(ServicioTutorias);
+
+  private idDocente = 0;
+
+  readonly hoy = this.fechaLocal(new Date());
+
+  estudiantes: EstudianteSesion[] = [];
+
+  materias: string[] = [];
+
+  readonly sesiones = signal<Sesion[]>([]);
+
   readonly editando = signal<number | null>(null);
   readonly aviso = signal('');
   readonly error = signal('');
   readonly filtro = signal('Todas');
+  readonly guardando = signal(false);
+
   readonly sesionesFiltradas = computed(() =>
-    this.sesiones().filter(s => this.filtro() === 'Todas' || s.estado === this.filtro())
-      .sort((a, b) => (a.fecha + a.inicio).localeCompare(b.fecha + b.inicio))
+
+    this.sesiones().filter(s =>
+      this.filtro() === 'Todas' ||
+      s.estado === this.filtro()
+    ).sort((a, b) =>
+      (a.fecha + a.inicio).localeCompare(b.fecha + b.inicio)
+    )
+
   );
 
   formulario: Formulario = this.vacio();
 
-  private fechaDemo(dias: number): string {
-    const d = new Date();
-    d.setDate(d.getDate() + dias);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // Cargar los estudiantes y las sesiones
+
+  async ngOnInit() {
+
+    try {
+
+      const datos = await this.servicio.estudiantesAsignados();
+
+      this.idDocente = datos.idDocente;
+      this.estudiantes = datos.estudiantes;
+
+    } catch (error) {
+
+      this.error.set(
+        error instanceof Error
+          ? error.message
+          : 'No se pudieron cargar los estudiantes.'
+      );
+
+    }
+
+    await this.cargarSesiones();
+
   }
+
+  // Consultar las sesiones registradas
+
+  async cargarSesiones() {
+
+    try {
+
+      const datos = await firstValueFrom(
+        this.servicio.listarSesiones()
+      );
+
+      const sesiones: Sesion[] = datos.map(s => {
+
+        const inicio = new Date(s.fechaInicio);
+        const fin = new Date(s.fechaFin);
+
+        return {
+
+          id: Number(s.idSesion),
+
+          estudiante: 'No disponible',
+
+          carnet: '',
+
+          materia: 'Tutoría #' + s.idSesion,
+
+          fecha: this.fechaLocal(inicio),
+
+          inicio: inicio.toTimeString().slice(0, 5),
+
+          fin: fin.toTimeString().slice(0, 5),
+
+          modalidad: s.modalidad as Modalidad,
+
+          ubicacion: '',
+
+          descripcion: '',
+
+          estado: s.estadoSesion as Estado
+
+        };
+
+      });
+
+      this.sesiones.set(sesiones);
+
+    } catch {
+
+      this.error.set('No se pudieron cargar las sesiones.');
+
+    }
+
+  }
+
+  // Obtener la fecha en formato año-mes-día
+
+  private fechaLocal(fecha: Date): string {
+
+    const anio = fecha.getFullYear();
+
+    const mes = String(
+      fecha.getMonth() + 1
+    ).padStart(2, '0');
+
+    const dia = String(
+      fecha.getDate()
+    ).padStart(2, '0');
+
+    return anio + '-' + mes + '-' + dia;
+
+  }
+
   private vacio(): Formulario {
-    return { estudiante: '', carnet: '', materia: '', fecha: '', inicio: '', fin: '',
-      modalidad: 'Presencial', ubicacion: '', descripcion: '' };
+
+    return {
+      estudiante: '',
+      carnet: '',
+      materia: '',
+      fecha: '',
+      inicio: '',
+      fin: '',
+      modalidad: 'Presencial',
+      ubicacion: '',
+      descripcion: ''
+    };
+
   }
+
   seleccionarEstudiante(carnet: string): void {
-    const e = this.estudiantes.find(x => x.carnet === carnet);
+
+    const e = this.estudiantes.find(x =>
+      x.carnet === carnet
+    );
+
     this.formulario.carnet = carnet;
     this.formulario.estudiante = e?.nombre ?? '';
+    this.formulario.materia = '';
+
+    this.materias = e
+      ? [...new Set(e.asignaciones.map(a => a.areaRefuerzo))]
+      : [];
+
   }
+
   cambiarModalidad(modalidad: Modalidad): void {
+
     this.formulario.modalidad = modalidad;
     this.formulario.ubicacion = '';
+
   }
-  guardar(): void {
+
+  // Validar y registrar una sesión
+
+  async guardar() {
+
+    if (this.guardando()) {
+      return;
+    }
+
     this.error.set('');
     this.aviso.set('');
+
     const f = this.formulario;
-    if (!f.carnet || !f.materia || !f.fecha || !f.inicio || !f.fin || !f.ubicacion.trim()) {
-      this.error.set('Completa todos los campos obligatorios.'); return;
+
+    if (!f.carnet || !f.materia || !f.fecha ||
+        !f.inicio || !f.fin || !f.ubicacion.trim()) {
+
+      this.error.set('Completa todos los campos obligatorios.');
+      return;
+
     }
+
     if (f.fecha < this.hoy) {
-      this.error.set('La fecha no puede ser anterior a hoy.'); return;
+
+      this.error.set('La fecha no puede ser anterior a hoy.');
+      return;
+
     }
+
     if (f.fin <= f.inicio) {
-      this.error.set('La hora de finalización debe ser posterior a la de inicio.'); return;
+
+      this.error.set(
+        'La hora de finalización debe ser posterior a la de inicio.'
+      );
+
+      return;
+
     }
-    const conflicto = this.sesiones().some(s =>
-      s.id !== this.editando() && s.estado === 'Programada' && s.fecha === f.fecha &&
-      f.inicio < s.fin && f.fin > s.inicio &&
-      (s.carnet === f.carnet)
+
+    if (f.descripcion.trim()) {
+
+      this.error.set(
+        'El objetivo de la sesión todavía no se puede guardar. Deja ese campo vacío.'
+      );
+
+      return;
+
+    }
+
+    const estudiante = this.estudiantes.find(e =>
+      e.carnet === f.carnet
     );
-    if (conflicto) {
-      this.error.set('El estudiante ya tiene una tutoría programada en ese horario.'); return;
+
+    const asignaciones = estudiante?.asignaciones.filter(a =>
+      a.areaRefuerzo === f.materia
+    ) || [];
+
+    if (asignaciones.length !== 1 || !this.idDocente) {
+
+      this.error.set(
+        'No se pudo identificar la asignación del estudiante.'
+      );
+
+      return;
+
     }
-    const id = this.editando();
-    if (id !== null) {
-      this.sesiones.update(lista => lista.map(s => s.id === id ? { ...f, id, estado: s.estado } : s));
-      this.aviso.set('Sesión actualizada en la demostración.');
-    } else {
-      const nuevoId = Math.max(0, ...this.sesiones().map(s => s.id)) + 1;
-      this.sesiones.update(lista => [...lista, { ...f, id: nuevoId, estado: 'Programada' }]);
-      this.aviso.set('Sesión registrada en la demostración.');
+
+    const asignacion = asignaciones[0];
+
+    this.guardando.set(true);
+
+    try {
+
+      const sesion = await firstValueFrom(
+
+        this.servicio.programarSesion({
+
+          idAsignacion: asignacion.idAsignacion,
+
+          fechaInicio: new Date(
+            f.fecha + 'T' + f.inicio
+          ).toISOString(),
+
+          fechaFin: new Date(
+            f.fecha + 'T' + f.fin
+          ).toISOString(),
+
+          modalidad: f.modalidad,
+
+          ubicacionEnlace: f.ubicacion.trim(),
+
+          idDocenteResponsable: this.idDocente,
+
+          idDocentes: [this.idDocente],
+
+          idAsignacionesParticipantes: [
+            asignacion.idAsignacion
+          ]
+
+        })
+
+      );
+
+      this.formulario = this.vacio();
+      this.materias = [];
+      this.editando.set(null);
+
+      try {
+
+        await firstValueFrom(
+          this.servicio.publicarSesion(
+            Number(sesion.idSesion)
+          )
+        );
+
+        this.aviso.set('Sesión programada correctamente.');
+
+      } catch {
+
+        this.error.set(
+          'La sesión fue registrada como borrador, pero no pudo publicarse.'
+        );
+
+      }
+
+      await this.cargarSesiones();
+
+    } catch (error) {
+
+      this.error.set(
+        error instanceof Error
+          ? error.message
+          : 'No se pudo programar la sesión.'
+      );
+
+    } finally {
+
+      this.guardando.set(false);
+
     }
-    this.editando.set(null);
-    this.formulario = this.vacio();
+
   }
+
   editar(s: Sesion): void {
-    this.editando.set(s.id);
-    this.formulario = { estudiante: s.estudiante, carnet: s.carnet, materia: s.materia,
-      fecha: s.fecha, inicio: s.inicio, fin: s.fin, modalidad: s.modalidad,
-      ubicacion: s.ubicacion, descripcion: s.descripcion };
-    this.error.set(''); this.aviso.set('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    this.error.set(
+      'La edición de sesiones todavía no está disponible.'
+    );
+
+    this.aviso.set('');
+
   }
+
   cancelarEdicion(): void {
+
     this.editando.set(null);
     this.formulario = this.vacio();
-    this.error.set(''); this.aviso.set('');
+    this.materias = [];
+    this.error.set('');
+    this.aviso.set('');
+
   }
+
   cancelarSesion(s: Sesion): void {
-    if (!confirm('¿Cancelar esta sesión de tutoría?')) return;
-    this.sesiones.update(lista => lista.map(x => x.id === s.id ? { ...x, estado: 'Cancelada' } : x));
-    if (this.editando() === s.id) this.cancelarEdicion();
-    this.aviso.set('Sesión cancelada en la demostración.');
+
+    this.error.set(
+      'La cancelación de sesiones todavía no está disponible.'
+    );
+
+    this.aviso.set('');
+
   }
+
 }
