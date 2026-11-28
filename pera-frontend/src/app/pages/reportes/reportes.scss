@@ -1,0 +1,12 @@
+.filtros { margin-bottom: 22px; }
+.indicadores { margin-bottom: 22px; }
+.indicadores p { margin: 0; color: var(--pera-text-muted); font-size: var(--pera-text-sm); }
+.indicadores strong { display: block; font-size: var(--pera-text-2xl); color: var(--pera-primary); }
+.indicadores strong.verde { color: var(--pera-success); }
+.indicadores strong.rojo { color: var(--pera-danger); }
+.indicadores small { color: var(--pera-text-muted); }
+.bloque .pera-card__title { margin-bottom: 6px; }
+.bloque > .pera-muted { margin: 0 0 16px; }
+.resumen-texto { margin: 12px 0 0; font-weight: 600; }
+.sin-datos { text-align: center; }
+.advertencia { color: var(--pera-text-muted); font-size: var(--pera-text-sm); }

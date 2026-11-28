@@ -1,0 +1,142 @@
+<main class="pera-container pera-page">
+  <div>
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">Jefatura de Departamento · PERA</p>
+        <h1 class="pera-page-title">Administrar docentes</h1>
+        <p class="pera-page-subtitle">Registra, edita, activa y desactiva docentes del programa.</p>
+      </div>
+      <span class="pera-badge pera-badge--info">Datos ficticios</span>
+    </header>
+
+    <div class="pera-grid pera-grid--3 resumen">
+      <div class="pera-stat">
+        <p>Docentes registrados</p>
+        <strong>{{ docentes.length }}</strong>
+      </div>
+      <div class="pera-stat">
+        <p>Docentes activos</p>
+        <strong>{{ totalActivos() }}</strong>
+      </div>
+      <div class="pera-stat">
+        <p>Docentes inactivos</p>
+        <strong>{{ docentes.length - totalActivos() }}</strong>
+      </div>
+    </div>
+
+    <p class="pera-alert pera-alert--success" *ngIf="mensaje" role="status">{{ mensaje }}</p>
+    <p class="pera-alert pera-alert--danger" *ngIf="error" role="alert">{{ error }}</p>
+
+    <section class="pera-card pera-section bloque">
+      <h2 class="pera-card__title">{{ editandoId === 0 ? 'Registrar docente' : 'Editar docente' }}</h2>
+      <p class="pera-muted">Completa los datos del docente. Todos los campos son obligatorios.</p>
+
+      <form (ngSubmit)="guardarDocente()">
+        <div class="pera-form-grid">
+          <div class="pera-field">
+            <label for="nombre">Nombre completo</label>
+            <input id="nombre" name="nombre" class="pera-input" type="text"
+              placeholder="Ej. Ana Martínez" [(ngModel)]="formulario.nombre" required />
+          </div>
+          <div class="pera-field">
+            <label for="correo">Correo institucional</label>
+            <input id="correo" name="correo" class="pera-input" type="email"
+              placeholder="docente@ues.edu.sv" [(ngModel)]="formulario.correo" required />
+          </div>
+          <div class="pera-field">
+            <label for="departamento">Departamento</label>
+            <select id="departamento" name="departamento" class="pera-select"
+              [(ngModel)]="formulario.departamento" required>
+              <option value="">Selecciona un departamento</option>
+              <option value="Informática">Informática</option>
+              <option value="Matemática">Matemática</option>
+              <option value="Física">Física</option>
+              <option value="Industrial">Industrial</option>
+            </select>
+          </div>
+          <div class="pera-field">
+            <label for="especialidad">Especialidad</label>
+            <input id="especialidad" name="especialidad" class="pera-input" type="text"
+              placeholder="Ej. Programación" [(ngModel)]="formulario.especialidad" required />
+          </div>
+        </div>
+        <div class="pera-form-actions">
+          <button type="button" class="pera-btn pera-btn--outline" (click)="limpiarFormulario()">
+            Cancelar / Limpiar
+          </button>
+          <button type="submit" class="pera-btn">
+            {{ editandoId === 0 ? 'Guardar docente' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="pera-card pera-section bloque">
+      <div class="titulo-lista">
+        <div>
+          <h2 class="pera-card__title">Listado de docentes</h2>
+          <p class="pera-muted">Consulta y administra los docentes registrados.</p>
+        </div>
+      </div>
+
+      <div class="pera-filter-bar">
+        <div class="pera-field">
+          <label for="busqueda">Buscar docente</label>
+          <input id="busqueda" class="pera-input" type="search"
+            placeholder="Nombre o correo" [(ngModel)]="busqueda" />
+        </div>
+        <div class="pera-field">
+          <label for="estado">Estado</label>
+          <select id="estado" class="pera-select" [(ngModel)]="filtroEstado">
+            <option value="Todos">Todos</option>
+            <option value="Activos">Activos</option>
+            <option value="Inactivos">Inactivos</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="pera-table-wrap">
+        <table class="pera-table">
+          <thead>
+            <tr>
+              <th>Docente</th>
+              <th>Correo</th>
+              <th>Departamento</th>
+              <th>Especialidad</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let docente of docentesFiltrados()">
+              <td><strong>{{ docente.nombre }}</strong></td>
+              <td>{{ docente.correo }}</td>
+              <td>{{ docente.departamento }}</td>
+              <td>{{ docente.especialidad }}</td>
+              <td>
+                <span class="pera-badge pera-badge--success" [class.pera-badge--danger]="!docente.activo">
+                  {{ docente.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <div class="pera-table__actions">
+                  <button type="button" class="pera-btn pera-btn--outline pera-btn--sm" (click)="editarDocente(docente)">
+                    Editar
+                  </button>
+                  <button type="button" class="pera-btn pera-btn--outline pera-btn--sm" (click)="cambiarEstado(docente)">
+                    {{ docente.activo ? 'Desactivar' : 'Activar' }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="docentesFiltrados().length === 0">
+              <td colspan="6" class="sin-resultados">No se encontraron docentes.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <p class="nota">Esta pantalla es una demostración. Los cambios no se guardan en una base de datos y se perderán al recargar.</p>
+  </div>
+</main>

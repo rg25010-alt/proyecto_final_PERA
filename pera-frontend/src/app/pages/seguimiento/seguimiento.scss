@@ -1,0 +1,10 @@
+.columnas { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; align-items: start; }
+.buscador { margin-bottom: 16px; }
+.lista-tutorias { display: grid; gap: 10px; }
+.tutoria { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; width: 100%; padding: 14px; border: 1px solid var(--pera-border); border-radius: var(--pera-radius); background: var(--pera-white); color: var(--pera-text-muted); text-align: left; }
+.tutoria:hover, .tutoria.activa { background: var(--pera-primary-soft); border-color: var(--pera-primary); }
+.tutoria-nombre { font-weight: 700; color: var(--pera-text); }
+form { display: grid; gap: 16px; }
+.resumen { display: flex; flex-direction: column; gap: 4px; }
+.aviso-demo { margin-top: 16px; color: var(--pera-text-muted); font-size: var(--pera-text-sm); }
+@media(max-width:800px) { .columnas { grid-template-columns: 1fr; } }

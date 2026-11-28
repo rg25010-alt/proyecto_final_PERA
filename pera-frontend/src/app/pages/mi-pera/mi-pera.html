@@ -1,0 +1,85 @@
+<main class="pera-container pera-page">
+  <div>
+    <div class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">Portal del estudiante · PERA</p>
+        <h1 class="pera-page-title">Mi PERA</h1>
+        <p class="pera-muted">Consulta tu información académica y el seguimiento de tus tutorías.</p>
+      </div>
+      <span class="pera-badge pera-badge--info">Datos de ejemplo</span>
+    </div>
+
+    <section class="pera-card perfil">
+      <div class="pera-avatar avatar">ML</div>
+      <div>
+        <p class="pera-eyebrow">Expediente académico</p>
+        <h2>{{ estudiante.nombre }}</h2>
+        <p class="pera-muted">{{ estudiante.carnet }} · {{ estudiante.carrera }}</p>
+      </div>
+      <span class="pera-badge pera-badge--warning">{{ estudiante.estado }}</span>
+    </section>
+
+    <div class="pera-grid pera-grid--3 indicadores">
+      <section class="pera-stat">
+        <p>Coeficiente de Unidades de Mérito (CUM)</p>
+        <strong>{{ estudiante.cum | number:'1.2-2' }}</strong>
+        <small>Información académica de ejemplo</small>
+      </section>
+      <section class="pera-stat">
+        <p>Unidades valorativas aprobadas</p>
+        <strong>{{ estudiante.uvAprobadas }}</strong>
+        <small>UV acumuladas</small>
+      </section>
+      <section class="pera-stat">
+        <p>Unidades valorativas inscritas</p>
+        <strong>{{ estudiante.uvInscritas }}</strong>
+        <small>UV del ciclo actual</small>
+      </section>
+    </div>
+
+    <section class="pera-card pera-section bloque">
+      <div class="pera-card__header titulo-seccion">
+        <div>
+          <h2 class="pera-card__title">Mis tutores asignados</h2>
+          <p class="pera-muted">Docentes que brindan apoyo en tus asignaturas.</p>
+        </div>
+      </div>
+      <div class="pera-grid pera-grid--2 tutores">
+        <div class="tutor" *ngFor="let tutor of tutores">
+          <div>
+            <h3>{{ tutor.nombre }}</h3>
+            <p>{{ tutor.asignatura }}</p>
+            <a [href]="'mailto:' + tutor.correo">{{ tutor.correo }}</a>
+          </div>
+      </div>
+    </section>
+
+    <section class="pera-card pera-section bloque">
+      <div class="pera-card__header titulo-seccion">
+        <div>
+          <h2 class="pera-card__title">Historial de tutorías</h2>
+          <p class="pera-muted">Sesiones realizadas y próximas actividades.</p>
+        </div>
+        <button class="pera-btn pera-btn--outline" type="button" (click)="cambiarHistorial()">
+          {{ mostrarHistorial() ? 'Ocultar historial' : 'Mostrar historial' }}
+        </button>
+      </div>
+
+      <div class="pera-table-wrap" *ngIf="mostrarHistorial()">
+        <table class="pera-table">
+          <thead>
+            <tr><th>Fecha</th><th>Actividad</th><th>Detalle</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let sesion of historial">
+              <td>{{ sesion.fecha | date:'dd/MM/yyyy' }}</td>
+              <td>{{ sesion.actividad }}</td>
+              <td>{{ sesion.detalle }}</td>
+              <td><span class="pera-badge pera-badge--success" [class.pera-badge--info]="sesion.estado === 'Programada'">{{ sesion.estado }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>

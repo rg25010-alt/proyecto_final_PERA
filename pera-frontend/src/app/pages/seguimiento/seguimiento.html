@@ -1,0 +1,84 @@
+<main class="pera-container pera-page">
+  <div>
+    <header class="pera-page-header">
+      <div>
+        <p class="pera-eyebrow">Gestión de tutorías · PERA</p>
+        <h1 class="pera-page-title">Seguimiento de tutorías</h1>
+        <p class="pera-page-subtitle">Registra asistencia, bitácora, calificaciones y acuerdos de cada sesión.</p>
+      </div>
+    </header>
+
+    <div class="columnas">
+      <section class="pera-card">
+        <div class="pera-card__header">
+          <div>
+            <h2 class="pera-card__title">Tutorías registradas</h2>
+            <p class="pera-card__subtitle">Selecciona una sesión para registrar su seguimiento.</p>
+          </div>
+        </div>
+        <div class="pera-field buscador">
+          <label for="buscar">Buscar estudiante o asignatura</label>
+          <input id="buscar" class="pera-input" type="text" placeholder="Escribe un nombre o materia" [(ngModel)]="filtro" />
+        </div>
+        <div class="lista-tutorias">
+          <button type="button" class="tutoria" *ngFor="let tutoria of tutoriasFiltradas"
+            [class.activa]="seleccionada?.id === tutoria.id" (click)="seleccionar(tutoria)">
+            <span class="tutoria-nombre">{{ tutoria.estudiante }}</span>
+            <span>{{ tutoria.materia }} · {{ tutoria.fecha | date:'dd/MM/yyyy' }}</span>
+            <span class="pera-badge pera-badge--info">{{ tutoria.asistencia }}</span>
+          </button>
+          <p *ngIf="tutoriasFiltradas.length === 0" class="pera-empty">No se encontraron tutorías.</p>
+        </div>
+      </section>
+
+      <section class="pera-card">
+        <div class="pera-card__header">
+          <div>
+            <h2 class="pera-card__title">Registro de seguimiento</h2>
+            <p class="pera-card__subtitle">Información de la sesión seleccionada.</p>
+          </div>
+        </div>
+
+        <div *ngIf="seleccionada === null" class="pera-empty">
+          Selecciona una tutoría de la lista para completar el formulario.
+        </div>
+
+        <form *ngIf="seleccionada !== null" (ngSubmit)="guardar()">
+          <div class="pera-alert resumen">
+            <strong>{{ seleccionada.estudiante }}</strong>
+            <span>{{ seleccionada.materia }} · {{ seleccionada.fecha | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="pera-field">
+            <label for="asistencia">Asistencia</label>
+            <select id="asistencia" name="asistencia" class="pera-select" [(ngModel)]="asistencia">
+              <option value="Pendiente">Pendiente</option>
+              <option value="Asistió">Asistió</option>
+              <option value="No asistió">No asistió</option>
+            </select>
+          </div>
+          <div class="pera-field">
+            <label for="nota">Bitácora de la tutoría</label>
+            <textarea id="nota" name="nota" class="pera-textarea" rows="4" [(ngModel)]="nota"
+              placeholder="Describe lo que se trabajó en la sesión"></textarea>
+          </div>
+          <div class="pera-field">
+            <label for="calificacion">Calificación (0 a 10, opcional)</label>
+            <input id="calificacion" name="calificacion" class="pera-input" type="number" min="0" max="10" step="0.1"
+              [(ngModel)]="calificacion" placeholder="Ejemplo: 8.5" />
+          </div>
+          <div class="pera-field">
+            <label for="acuerdos">Acuerdos y tareas pendientes</label>
+            <textarea id="acuerdos" name="acuerdos" class="pera-textarea" rows="3" [(ngModel)]="acuerdos"
+              placeholder="Escribe los compromisos para la próxima sesión"></textarea>
+          </div>
+          <p *ngIf="mensaje" class="pera-alert pera-alert--success" role="status">{{ mensaje }}</p>
+          <div class="pera-form-actions">
+            <button type="button" class="pera-btn pera-btn--outline" (click)="limpiar()">Cerrar</button>
+            <button type="submit" class="pera-btn">Guardar seguimiento</button>
+          </div>
+        </form>
+      </section>
+    </div>
+    <p class="aviso-demo">Esta pantalla usa datos ficticios. Los cambios no se guardan en la base de datos.</p>
+  </div>
+</main>
