@@ -1,0 +1,33 @@
+* [33m87a143f[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mbackend[m[33m, [m[1;31morigin/backend[m[33m)[m feat(frontend): conectar servicios y sesión a GraphQL
+* [33md3f8109[m completar fase 3 de tutorías, seguimiento y notificaciones
+*   [33m0e19b1c[m Merge origin/backend: Fase 3 gestiones y consultas
+[32m|[m[33m\[m  
+[32m|[m * [33m4ae1d56[m Fase 3 parte 6, gestiones y consultass
+[32m|[m * [33m7494bab[m Fase 3 parte 6, gestiones y consultass
+* [33m|[m [33m934c75f[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Backend Fase 2
+[34m|[m[33m\[m[33m|[m 
+[34m|[m * [33m63ea0ea[m Implementar autenticación, permisos y auditoría de la fase 2
+[34m|[m * [33m94be8b8[m Completar fase 1 PERA, documento seeds y cords
+[34m|[m * [33m8f115c1[m refactor(backend): migrar a EF Core database-first y GraphQL
+[34m|[m * [33m02b2d01[m fix (infra): correccion de montaje de script sql en compose
+[34m|[m * [33m1cd328a[m db: agregar esquema inicial de base de datos
+[34m|[m * [33m6496deb[m chore: configurar dependencias del backend y archivos de entorno
+[34m|[m[34m/[m  
+[34m|[m * [33mccb7def[m[33m ([m[1;31morigin/frontend-pantallas-7-14[m[33m, [m[1;32mfrontend-pantallas-7-14[m[33m)[m agregar pantallas 7 a 14 del frontend PERA
+[34m|[m[34m/[m  
+[34m|[m *   [33m3e3cf3e[m[33m ([m[1;31morigin/feat/pantallas-acceso[m[33m)[m Añadir pantallas de acceso y funcionalidades de asignación de tutores
+[34m|[m [1;31m|[m[34m\[m  
+[34m|[m [1;31m|[m[34m/[m  
+[34m|[m[34m/[m[1;31m|[m   
+* [1;31m|[m [33m6ef1fde[m[33m ([m[1;32mmain[m[33m)[m asignacion-tutores
+[1;33m|[m[1;31m\[m[1;31m|[m 
+[1;33m|[m * [33m7ddc2c0[m asognacion-tutores
+* [1;34m|[m [33mfea4071[m Merge pull request #9 from rg25010-alt/feat/pantallas-acceso
+[1;35m|[m[1;34m\[m[1;34m|[m 
+[1;35m|[m * [33m5a1f1c5[m expedientes-detalles
+[1;35m|[m *   [33m55d74d3[m Actualizacion Pantallas
+[1;35m|[m [31m|[m[1;35m\[m  
+[1;35m|[m [31m|[m[1;35m/[m  
+[1;35m|[m[1;35m/[m[31m|[m   
+* [31m|[m [33mb74c285[m Registrar expediente
+[33m|[m[31m\[m[31m|[m 

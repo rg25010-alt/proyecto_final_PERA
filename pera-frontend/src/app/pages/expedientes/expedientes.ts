@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Carrera, Expediente } from '../../models/expediente';
 import { ServicioExpedientes } from '../../services/expedientes';
@@ -43,8 +42,11 @@ export class PaginaExpedientes implements OnInit {
     this.confirmacion.set('');
     this.guardando.set(true);
     this.api.registrar({
-      carnet: String(campos.get('carnet')).trim(),
-      nombre: String(campos.get('nombre')).trim(),
+      carnet: String(campos.get('carnet')).trim().toUpperCase(),
+      nombre: String(campos.get('nombres')).trim(),
+      apellidos: String(campos.get('apellidos')).trim(),
+      correo: String(campos.get('correo')).trim(),
+      clave: String(campos.get('clave')),
       carreraId: Number(campos.get('carreraId')),
       cum: Number(campos.get('cum')),
     }).subscribe({
@@ -53,10 +55,11 @@ export class PaginaExpedientes implements OnInit {
         formulario.reset();
         this.confirmacion.set('Expediente registrado con el carné ' + expediente.carnet + '.');
       },
-      error: (error: HttpErrorResponse) => {
+      error: (error: unknown) => {
         this.guardando.set(false);
-        const mensajes = Object.values(error.error?.errors ?? {}).flat().join(' ');
-        this.errorAlta.set(mensajes || error.error?.mensaje || 'No se pudo registrar el expediente.');
+        this.errorAlta.set(error instanceof Error
+          ? error.message
+          : 'No se pudo registrar el expediente.');
       },
     });
   }
@@ -69,13 +72,14 @@ export class PaginaExpedientes implements OnInit {
     this.buscando.set(true);
     this.api.buscar(carnet).subscribe({
       next: expediente => {
-        this.resultado.set(expediente);
         this.buscando.set(false);
+        if (expediente) this.resultado.set(expediente);
+        else this.errorBusqueda.set('No se encontró un expediente con ese carné.');
       },
-      error: (error: HttpErrorResponse) => {
+      error: (error: unknown) => {
         this.buscando.set(false);
-        this.errorBusqueda.set(error.status === 404
-          ? 'No se encontró un expediente con ese carné.'
+        this.errorBusqueda.set(error instanceof Error
+          ? error.message
           : 'No se pudo consultar el expediente.');
       },
     });
